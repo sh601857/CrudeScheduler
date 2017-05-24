@@ -1,4 +1,4 @@
-﻿#coding=utf-8 
+#coding=utf-8 
 
 import configparser
 from pathlib import Path
@@ -19,50 +19,38 @@ class Singleton(type):
 class AppProject(metaclass=Singleton):
     def __init__(self):
         #super(AppProject, self).__init__() 
-        self.mFilePath = u''
-        self.mDBFolder = u'db'
-        self.mSimFolder = u'sim'
+        self.mConfig = configparser.ConfigParser() 
+        self.reset()     
         self.mLogWdg = None
 
     def reset(self):
         self.mFilePath = u''
-        self.mDBFolder = u'db'
-        self.mSimFolder = u'sim'
-        
+        self.mConfig['Paths'] = {'Excel': 'Excel', 'gms': 'gms',
+                          'Sol': 'Sol'}        
+               
     def save(self):
-        if self.mFilePath !='' and Path( self.mFilePath ).parent.exists():      
-            config = configparser.ConfigParser()
-            config['Paths'] = {'DB': self.mDBFolder,
-                              'Sim': self.mSimFolder}
-    
+        if self.mFilePath !='' and Path( self.mFilePath ).parent.exists():          
             with open(self.mFilePath, 'w') as projectfile:
-                config.write(projectfile)
-
+                self.mConfig.write(projectfile)
 
     def load(self):
-        config = configparser.ConfigParser()
         if self.mFilePath !='' and  Path( self.mFilePath ).exists():
-            config.read(self.mFilePath)
-            self.mDBFolder = config['Paths']['DB']
-            self.mSimFolder = config['Paths']['Sim'] 
+            self.mConfig.clear()
+            self.mConfig.read(self.mFilePath)
             
     def creatFolder(self):
         profile = Path( self.mFilePath )
         if self.mFilePath !='' and  profile.exists():
-            dirPath = (profile.parent / self.mDBFolder)
-            if not dirPath.exists() :
-                dirPath.mkdir()
-            dirPath = (profile.parent / self.mSimFolder)
-            if not dirPath.exists() :
-                dirPath.mkdir() 
-                
+            for key in self.mConfig['Paths'] :            
+                dirPath = (profile.parent / self.mConfig['Paths'][key])
+                if not dirPath.exists() :
+                    dirPath.mkdir()
+
     def getPath(self,pathType,dfFileName):
         profile = Path( self.mFilePath )
         if self.mFilePath !='' and  profile.exists():
-            if( pathType ) == 'DB' :
-                return str( profile.parent / self.mDBFolder / dfFileName )
-            if( pathType ) == 'Sim' :
-                return str( profile.parent / self.mSimFolder / dfFileName )
+            if pathType in self.mConfig['Paths']:
+                return str( profile.parent / self.mDBFolder / self.mConfig['Paths'][pathType] )
         else:
             return ''
         

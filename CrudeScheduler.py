@@ -85,7 +85,7 @@ class MainW(QtGui.QMainWindow):
             activeSheetName = 'Operations' 
             
         if activeSheetName != '':
-            wb = xw.Book(u'D:\\Workspace\\Crude\\CrudeScheduler.xlsm') 
+            wb = xw.Book(u'E:\\HYJ\\CrudeScheduler\\CrudeScheduler.xlsm') 
             ws = wb.sheets[activeSheetName]
             ws.activate()
             wb.activate(steal_focus=True)
