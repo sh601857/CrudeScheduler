@@ -11,6 +11,7 @@ import xlwings as xw
 import AppProject
 #import PlotWidget
 import LogWidget
+import RunOptWidget
 
 
 
@@ -58,6 +59,8 @@ class MainW(QtGui.QMainWindow):
             #self.censw.setCurrentWidget(self.simSpecWgt)
             #self.simSpecWgt.loadData()   
             pass
+        elif wgtID == 2001:
+            self.censw.setCurrentWidget(self.runOptWidget)
         else:
             self.censw.setCurrentWidget(self.emptyPageWidget)
             
@@ -83,13 +86,18 @@ class MainW(QtGui.QMainWindow):
             activeSheetName = 'CDUs' 
         elif wgtID == 1005:
             activeSheetName = 'Operations' 
-            
+        elif wgtID == 2001:
+            if( self._curWgtID != wgtID):        
+                self.setCensWgt(wgtID)  
+                
         if activeSheetName != '':
             wb = xw.Book(u'E:\\HYJ\\CrudeScheduler\\CrudeScheduler.xlsm') 
             ws = wb.sheets[activeSheetName]
             ws.activate()
             wb.activate(steal_focus=True)
             wb.api.Application.WindowState = -4143
+            
+        
 
     @QtCore.Slot()
     def newProject(self):            
@@ -156,8 +164,8 @@ class MainW(QtGui.QMainWindow):
         item.appendRow( createItem({'text':'Operations', 'ID':1005,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
         parentItem.appendRow(item)
         
-        item = createItem({'text':'2.Cases','ID':2001,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, })
-        item.appendRow( createItem({'text':'Sample Plan','ID':201,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        item = createItem({'text':'2.Optimization','ID':2001,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, })
+        item.appendRow( createItem({'text':'Shecdule','ID':2002,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
         parentItem.appendRow(item)
   
         self.cmdTree = QtGui.QTreeView(self)
@@ -191,9 +199,11 @@ class MainW(QtGui.QMainWindow):
     def _createCentralWgt(self) :
 
         self.emptyPageWidget =  QtGui.QWidget()
+        self.runOptWidget = RunOptWidget.RunOptWidget()
     
         self.censw =  QtGui.QStackedWidget()
         self.censw.addWidget(self.emptyPageWidget)
+        self.censw.addWidget(self.runOptWidget)
     
         self.censw.setCurrentIndex(0)
         self._curWgtID = 0

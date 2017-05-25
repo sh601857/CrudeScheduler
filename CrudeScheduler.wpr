@@ -41,3 +41,4 @@ console.toolbox = [{'autosave': False,
                     'raise_panel': True,
                     'title': None}]
 proj.file-type = 'shared'
+proj.main-file = loc('CrudeScheduler.py')
