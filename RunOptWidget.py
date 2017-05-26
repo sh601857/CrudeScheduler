@@ -5,6 +5,7 @@ from PySide.QtGui import *
 import subprocess  
 import AppProject
 
+
 class RunOptWidget(QWidget):
 
     def __init__(self):
@@ -30,13 +31,17 @@ class RunOptWidget(QWidget):
         appPro = AppProject.AppProject()
         appPro.mLogWdg.logAppend( self.tr('Opt Began') ,True)
         
-        proc = subprocess.Popen(['C:\\GAMS\\win64\\24.7\\gams.exe','CrudeScheduler.gms'], stdout=subprocess.PIPE, 
+        p = subprocess.Popen(['C:\\GAMS\\win64\\24.7\\gams.exe','CrudeScheduler.gms', 'Lo=3'], bufsize=1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
                               cwd='D:\\cases\\ics\\ics2\\gms') 
-        
-        while proc.returncode == None: 
-            msg = proc.stdout.readline()
-            print(msg)
-            appPro.mLogWdg.logAppend(msg,True)
-        
+        #p = subprocess.Popen(['dir'], shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1,
+        #                              cwd='D:\\cases\\ics\\ics2\\gms') 
+        for line in iter(p.stdout.readline, b''):
+            print(line)
+            #print (line.decode('gb2312'))  
+            msgLine = line.decode('gb2312')
+            msgLine = msgLine.replace('\r\n','')
+            appPro.mLogWdg.logAppend(msgLine,True)
+  
+        p.stdout.close()
+        p.wait()                
         appPro.mLogWdg.logAppend( self.tr('Opt Finished') ,True)
-        pass   
