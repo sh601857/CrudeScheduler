@@ -31,7 +31,7 @@ class RunOptWidget(QWidget):
         appPro = AppProject.AppProject()
         appPro.mLogWdg.logAppend( self.tr('Opt Began') ,True)
         
-        p = subprocess.Popen(['C:\\GAMS\\win64\\24.7\\gams.exe','CrudeScheduler.gms', 'Lo=3'], bufsize=1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
+        p = subprocess.Popen(['C:\\GAMS\\win64\\24.7\\gams.exe','CrudeSchMOS_CZ_RunOP.gms', 'Lo=3'], bufsize=1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
                               cwd='D:\\cases\\ics\\ics2\\gms') 
         #p = subprocess.Popen(['dir'], shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1,
         #                              cwd='D:\\cases\\ics\\ics2\\gms') 

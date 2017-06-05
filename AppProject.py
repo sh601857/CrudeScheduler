@@ -50,7 +50,7 @@ class AppProject(metaclass=Singleton):
         profile = Path( self.mFilePath )
         if self.mFilePath !='' and  profile.exists():
             if pathType in self.mConfig['Paths']:
-                return str( profile.parent / self.mDBFolder / self.mConfig['Paths'][pathType] )
+                return str( profile.parent / self.mConfig['Paths'][pathType] / dfFileName )
         else:
             return ''
         

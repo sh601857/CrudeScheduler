@@ -9,7 +9,7 @@ from PySide import QtGui
 import xlwings as xw
 
 import AppProject
-#import PlotWidget
+import PlotWidget
 import LogWidget
 import RunOptWidget
 
@@ -61,6 +61,9 @@ class MainW(QtGui.QMainWindow):
             pass
         elif wgtID == 2001:
             self.censw.setCurrentWidget(self.runOptWidget)
+        elif 2002 == wgtID:
+            self.censw.setCurrentWidget(self.plotWidget)
+            self.plotWidget.loadData()
         else:
             self.censw.setCurrentWidget(self.emptyPageWidget)
             
@@ -199,11 +202,13 @@ class MainW(QtGui.QMainWindow):
     def _createCentralWgt(self) :
 
         self.emptyPageWidget =  QtGui.QWidget()
+        self.plotWidget = PlotWidget.PlotWidget()
         self.runOptWidget = RunOptWidget.RunOptWidget()
     
         self.censw =  QtGui.QStackedWidget()
         self.censw.addWidget(self.emptyPageWidget)
         self.censw.addWidget(self.runOptWidget)
+        self.censw.addWidget(self.plotWidget)
     
         self.censw.setCurrentIndex(0)
         self._curWgtID = 0

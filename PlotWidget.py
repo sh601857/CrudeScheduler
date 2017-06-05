@@ -1,4 +1,4 @@
-﻿#coding=utf-8 
+#coding=utf-8 
 
 import sys
 import matplotlib
@@ -8,11 +8,14 @@ import pylab
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
 from matplotlib.widgets import Slider, Button, RadioButtons,SpanSelector
 
 from PySide.QtCore import *
 from PySide.QtGui import *
+from pathlib import Path
+import AppProject
 
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
@@ -24,133 +27,97 @@ class MyMplCanvas(FigureCanvas):
         FigureCanvas.setSizePolicy(self,
                                    QSizePolicy.Expanding,
                                    QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-        
-        self.axes = self.fig.add_axes([0.06, 0.10, 0.9, 0.85], axis_bgcolor=(.94,.94,.94))
-        
+        FigureCanvas.updateGeometry(self)  
+        self.axes = self.fig.add_axes([0.05, 0.1, 0.9, 0.85], axis_bgcolor=(.94,.94,.94))
         self.compute_initial_figure()
-        
-        # horizontal x range span
-        axxspan = self.fig.add_axes([0.06, 0.05, 0.9, 0.02])
-        axxspan.axis([-0.2, 1.2, -0.2, 1.2])
-        axxspan.tick_params('y', labelright = False ,labelleft = False ,length=0)
-        self.xspan = SpanSelector(axxspan, self.onselectX, 'horizontal',useblit=True, span_stays=True,  rectprops=dict(alpha=0.5, facecolor='blue'))
-        
-        # vertical y range span
-        axyspan = self.fig.add_axes([0.02, 0.10, 0.01, 0.85])
-        axyspan.axis([-0.2, 1.2, -0.2, 1.2])
-        axyspan.tick_params('x', labelbottom = False ,labeltop = False ,length=0)
-        self.yspan = SpanSelector(axyspan, self.onselectY, 'vertical',useblit=True, span_stays=True,  rectprops=dict(alpha=0.5, facecolor='blue'))
-        # reset x y spans
-        axReset = self.fig.add_axes([0.01, 0.05, 0.03, 0.03],frameon=False, )
-        self.bnReset = Button(axReset, 'Reset')
-        self.bnReset.on_clicked( self.xyReset )
+
         # contextMenu
         acExportPlot = QAction(self.tr("Export plot"), self)
         FigureCanvas.connect(acExportPlot,SIGNAL('triggered()'), self, SLOT('exportPlot()') )
         FigureCanvas.addAction(self, acExportPlot )
         FigureCanvas.setContextMenuPolicy(self, Qt.ActionsContextMenu )
+
+    def compute_initial_figure(self):
+        appPro = AppProject.AppProject()
+        schFile=appPro.getPath('Sol', u'CS_MOS_CZ_schedule.csv')
+        #schFile = u'D:\\cases\\ics\\ics2\\gms\\CS_MOS_CZ_schedule.csv'
+        if schFile == '' or Path( schFile ).exists() == False :   # No file
+            return 
         
-    def onselectX(self, xmin, xmax) :
-        self.axes.set_xlim(xmin, xmax)
-        self.draw_idle()
+        df = pd.read_csv(schFile, names=['From','To','n','TS','TE','Vol'])
+        df.sort_values(by=['To','TS','From'], inplace=True)
+        for i in range(1,len(df)):
+            if df.iloc[i,0] == df.iloc[i-1,0] and df.iloc[i,1] == df.iloc[i-1,1] and df.iloc[i,3] == df.iloc[i-1,4]:
+                df.iloc[i,3] = df.iloc[i-1,3]
+                df.iloc[i,5] = df.iloc[i-1,5] + df.iloc[i,5]
+                df.iloc[i-1,5] = -1;
+        df = df[df.Vol>0]
         
-    def onselectY(self, ymin, ymax) :
-        self.axes.set_ylim(ymin, ymax)
-        self.draw_idle() 
+        cdus = [('CDU1',1)]
+        linewidth=2
+        colors=['chocolate','grey']
+        colorTankIn = 'c'
+        colorTankOut = 'b'
+        ytk  =[]
+        ytkl =[]
+        for u in cdus :
+            ytk.append(u[1])
+            ytkl.append(u[0])
+            df_u = df[df.To==u[0]]
+            #print(df_u)
+            for i in range(0,len(df_u)):
+                #plt.plot([ df_u.iloc[i,3], df_u.iloc[i,4] ] , [u[1],u[1]],  color=colors[i%2], linewidth=linewidth)
+                self.axes.bar(df_u.iloc[i,3], 0.2, width=df_u.iloc[i,4]-df_u.iloc[i,3], bottom=u[1]-0.1, color=colors[i%2], linewidth=0)
+                self.axes.text(df_u.iloc[i,3], u[1]-0.4, df_u.iloc[i,0],color=colors[i%2],)
         
-    def xyReset(self, event) :
-        self.axes.set_xlim(-0.2, 1.2)
-        self.axes.set_ylim(-0.2, 1.2)
-        self.yspan.stay_rect.set_visible(False)
-        self.xspan.stay_rect.set_visible(False)
+        tanks = [('G109',2),('G102',3),('G101',4),('G184',5),('G183',6),('G182',7),('G181',8),('V2',9),('V1',10)]   
+        for u in tanks :
+            ytk.append(u[1])
+            ytkl.append(u[0])    
+            df_u = df[df.To==u[0]]  #tank in
+            #print(df_u)
+            for i in range(0,len(df_u)):
+                #plt.plot([ df_u.iloc[i,3], df_u.iloc[i,4] ] , [u[1]+0.1,u[1]+0.1],  color=colorTankIn, linewidth=linewidth)
+                self.axes.bar(df_u.iloc[i,3], 0.2, width=df_u.iloc[i,4]-df_u.iloc[i,3], bottom=u[1]+0.00, color=colorTankIn, linewidth=0)
+                self.axes.text(df_u.iloc[i,3], u[1]+0.25, df_u.iloc[i,0],  color=colorTankIn)
+        
+        for u in tanks :
+            df_u = df[df.From==u[0]] #tank Out
+            #print(df_u)
+            for i in range(0,len(df_u)):
+                #plt.plot([ df_u.iloc[i,3], df_u.iloc[i,4] ] , [u[1]-0.1,u[1]-0.1],  color=colorTankOut, linewidth=linewidth)
+                self.axes.bar(df_u.iloc[i,3], 0.2, width=df_u.iloc[i,4]-df_u.iloc[i,3], bottom=u[1]-0.20, color=colorTankOut, linewidth=0)
+                self.axes.text(df_u.iloc[i,3], u[1]-0.45, df_u.iloc[i,1],color=colorTankOut)
+        
+        self.axes.set_ylim( 0, 11 ) 
+        self.axes.set_xlim(0, df['TE'].max())
+        self.axes.set_yticks(ytk)
+        self.axes.set_yticklabels(ytkl)
+        self.axes.set_title( u'**石化2017年*月原油运输调度方案' )
+        self.axes.set_xlabel(u'天')
         self.draw_idle()
 
-    
-    def compute_initial_figure(self):
-        N = 50
-        x = np.random.rand(N)
-        y = np.random.rand(N)
-        colors = np.random.rand(N)
-        area = np.pi * (15 * np.random.rand(N))**2  # 0 to 15 point radiuses
-        
-        self.axes.scatter(x, y, s=area, c=colors, alpha=0.5) 
-        self.axes.axis([-0.2, 1.2, -0.2, 1.2])
-        
     def exportPlot(self):
-        
+
         fileName = QFileDialog.getSaveFileName( self, self.tr("Save figure"), "", ("PNG file (*.png)") ) [0]
         if fileName == '':   # No file selected
             return  
         self.fig.savefig( fileName, format='png' )
-        
+
 class PlotWidget(QWidget):
     def __init__(self):
         super(PlotWidget, self).__init__()     
         self.initUI()
-        
+
     def initUI(self):
-                        
-        # generate the canvas to display the plot
-        #self.canvas = FigureCanvas(self.fig)
-        
+
         self.canvas = MyMplCanvas(self, width=5, height=4)
         layout =  QVBoxLayout()
         layout.addWidget(self.canvas)
         layout.setContentsMargins(1,1,1,1)
-        
-        self.setLayout(layout)  
-        
-        
-        
-        #class MyMplCanvas(FigureCanvas):
-            #"""Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
-        
-            #def __init__(self, parent=None, width=5, height=4, dpi=None):
-                #fig = Figure(figsize=(width, height), dpi=dpi)
-                #FigureCanvas.__init__(self, fig)
-                #self.setParent(parent)
-            
-                #FigureCanvas.setSizePolicy(self,
-                                           #QSizePolicy.Expanding,
-                                           #QSizePolicy.Expanding)
-                #FigureCanvas.updateGeometry(self)
-                
-                #axcolor = 'lightgoldenrodyellow'
-                #self.axes = fig.add_axes([0.25, 0.25, 0.65, 0.7], axisbg=axcolor)
-                
-                ##self.axes.subplots_adjust(left=0.25, bottom=0.25)
-                ## We want the axes cleared every time plot() is called
-                ##self.axes.hold(False)
-                
-                #self.compute_initial_figure()  
-                
-                
-                
-                #axxmin = fig.add_axes([0.25, 0.1, 0.65, 0.03], axisbg=axcolor)
-                #axxmax = fig.add_axes([0.25, 0.15, 0.65, 0.03], axisbg=axcolor) 
-                
-                #self.sXMIN = Slider(axxmin, 'XMin', 0.0, 1.0, valinit=0.0)
-                #self.sXMAX = Slider(axxmax, 'XMax', 0.0, 1.0, valinit=1.0,slidermin=self.sXMIN) 
-                #self.sXMIN.slidermax = self.sXMAX
-                
-                #self.sXMIN.on_changed(self.updateSider)
-                #self.sXMAX.on_changed(self.updateSider)                        
-        
-            #def compute_initial_figure(self):
-                #t = np.arange(0.0, 1.0, 0.001)
-                #a0 = 5
-                #f0 = 3
-                #s = a0*np.sin(2*np.pi*f0*t)
-                #self.l, = self.axes.plot(t, s, lw=2, color='red')
-                #self.axes.axis([0, 1, -10, 10])  
-                ##plt.show()
-                
-            #def updateSider(self, val):
-                ##t = np.arange(0.0, 1.0, 0.001)
-                #xmin = self.sXMIN.val
-                #xmax = self.sXMAX.val
-                ##self.l.set_ydata(amp*np.sin(2*np.pi*freq*t))
-                #self.axes.set_xlim( xmin, xmax )
-                
-                #self.draw_idle()
+
+        self.setLayout(layout) 
+    
+    def loadData(self):
+        self.canvas.axes.clear()
+        self.canvas.compute_initial_figure()
