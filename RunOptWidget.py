@@ -4,7 +4,8 @@ from PySide.QtCore import *
 from PySide.QtGui import *
 import subprocess  
 import AppProject
-
+import GenGamsDat
+from pathlib import Path
 
 class RunOptWidget(QWidget):
 
@@ -30,6 +31,15 @@ class RunOptWidget(QWidget):
     def runOpt(self):  
         appPro = AppProject.AppProject()
         appPro.mLogWdg.logAppend( self.tr('Opt Began') ,True)
+        xlFile = appPro.getPath('Excel' , 'CrudeScheduler.xlsm')
+        if xlFile == '' or Path( xlFile ).exists() == False:
+            appPro.mLogWdg.logAppend('[CrudeScheduler.xlsm] not found',True)
+            return
+        GamsDatFolder = appPro.getPath('gms' , 'GamsDat') + '\\'
+        if xlFile == '' :
+            appPro.mLogWdg.logAppend('[GamsDat] not found',True)
+            return        
+        GenGamsDat.run(xlFile, GamsDatFolder)
         
         p = subprocess.Popen(['C:\\GAMS\\win64\\24.7\\gams.exe','CrudeSchMOS_CZ_RunOP.gms', 'Lo=3'], bufsize=1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
                               cwd='D:\\cases\\ics\\ics2\\gms') 

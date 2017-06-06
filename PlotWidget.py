@@ -39,7 +39,7 @@ class MyMplCanvas(FigureCanvas):
 
     def compute_initial_figure(self):
         appPro = AppProject.AppProject()
-        schFile=appPro.getPath('Sol', u'CS_MOS_CZ_schedule.csv')
+        schFile=appPro.getPath('Sol', u'MOS_CZ_schedule.csv')
         #schFile = u'D:\\cases\\ics\\ics2\\gms\\CS_MOS_CZ_schedule.csv'
         if schFile == '' or Path( schFile ).exists() == False :   # No file
             return 

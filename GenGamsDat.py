@@ -6,6 +6,7 @@ import xlwings as xw
 def run(xlFile, GamsDatFolder):
 
     wb = xw.Book(xlFile)
+    wb.api.Application.WindowState = -4140 # xlMinimized 
     
     # file_WRR = open(GamsDatFolder + u'Set_WRR.dat', 'w')
     # sht = wb.sheets['Operations']
@@ -236,5 +237,5 @@ def run(xlFile, GamsDatFolder):
     # wb.save()     
     # wb.close()
 
-run(u'D:\\cases\\ics\\ics2\\Excel\\CrudeScheduler.xlsm', u'D:\\cases\\ics\\ics2\\gms\\GamsDat\\')
+#run(u'D:\\cases\\ics\\ics2\\Excel\\CrudeScheduler.xlsm', u'D:\\cases\\ics\\ics2\\gms\\GamsDat\\')
 

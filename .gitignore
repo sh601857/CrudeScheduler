@@ -48,5 +48,6 @@ Temporary Items
 
 # user 
 build
+dist
 __pycache__
 bulil.log

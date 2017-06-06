@@ -1,6 +1,6 @@
 #coding=utf-8 
 
-
+import tkinter.filedialog
 import sys
 import os
 from pathlib import Path
@@ -94,13 +94,17 @@ class MainW(QtGui.QMainWindow):
                 self.setCensWgt(wgtID)  
                 
         if activeSheetName != '':
-            wb = xw.Book(u'E:\\HYJ\\CrudeScheduler\\CrudeScheduler.xlsm') 
+            appPro = AppProject.AppProject()
+            xlFile = appPro.getPath('Excel' , 'CrudeScheduler.xlsm')
+            if xlFile == '' or Path( xlFile ).exists() == False:
+                appPro.mLogWdg.logAppend('[CrudeScheduler.xlsm] not found',True)
+                return            
+            wb = xw.Book(xlFile) 
             ws = wb.sheets[activeSheetName]
             ws.activate()
             wb.activate(steal_focus=True)
             wb.api.Application.WindowState = -4143
-            
-        
+                   
 
     @QtCore.Slot()
     def newProject(self):            
