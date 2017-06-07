@@ -4,7 +4,7 @@ import sys
 import matplotlib
 matplotlib.use('Qt4Agg')
 import pylab
-
+import math
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
@@ -28,7 +28,7 @@ class MyMplCanvas(FigureCanvas):
                                    QSizePolicy.Expanding,
                                    QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)  
-        self.axes = self.fig.add_axes([0.05, 0.1, 0.9, 0.85], axis_bgcolor=(.94,.94,.94))
+        self.axes = self.fig.add_axes([0.05, 0.05, 0.9, 0.9], axis_bgcolor=(.94,.94,.94))
         self.compute_initial_figure()
 
         # contextMenu
@@ -43,7 +43,15 @@ class MyMplCanvas(FigureCanvas):
         #schFile = u'D:\\cases\\ics\\ics2\\gms\\CS_MOS_CZ_schedule.csv'
         if schFile == '' or Path( schFile ).exists() == False :   # No file
             return 
-        
+        xlFile = appPro.getPath('Excel' , 'CrudeScheduler.xlsm')
+        if xlFile == '' or Path( xlFile ).exists() == False:
+            return 
+        import xlwings as xw
+        from datetime import timedelta, datetime
+        wb = xw.Book(xlFile)
+        wb.api.Application.WindowState = -4140 # xlMinimized  
+        startDate = wb.sheets['Settings'].range('B2').value
+       
         df = pd.read_csv(schFile, names=['From','To','n','TS','TE','Vol'])
         df.sort_values(by=['To','TS','From'], inplace=True)
         for i in range(1,len(df)):
@@ -90,11 +98,17 @@ class MyMplCanvas(FigureCanvas):
                 self.axes.text(df_u.iloc[i,3], u[1]-0.45, df_u.iloc[i,1],color=colorTankOut)
         
         self.axes.set_ylim( 0, 11 ) 
-        self.axes.set_xlim(0, df['TE'].max())
         self.axes.set_yticks(ytk)
-        self.axes.set_yticklabels(ytkl)
+        self.axes.set_yticklabels(ytkl)        
+        self.axes.set_xlim(df['TS'].min(), df['TE'].max())
+        xtk = range(0, math.ceil(df['TE'].max() +1), 1 )
+        xtkl = [(startDate+timedelta(days=x)).strftime("%y/%m/%d %H:%M") for x in xtk]
+        print(xtkl)
+        self.axes.set_xticks( xtk )
+        self.axes.set_xticklabels( xtkl )
+
         self.axes.set_title( u'**石化2017年*月原油运输调度方案' )
-        self.axes.set_xlabel(u'天')
+        #self.axes.set_xlabel(u'天')
         self.draw_idle()
 
     def exportPlot(self):
