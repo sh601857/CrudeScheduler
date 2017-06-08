@@ -53,4 +53,37 @@ class AppProject(metaclass=Singleton):
                 return str( profile.parent / self.mConfig['Paths'][pathType] / dfFileName )
         else:
             return ''
+               
+class AppConfig(metaclass=Singleton):
+    def __init__(self):
+        #super(AppProject, self).__init__() 
+        self.mConfig = configparser.ConfigParser() 
+        self.reset()           
         
+    def reset(self):
+        self.mConfig['Paths'] = {'gams': 'C:\\GAMS\\win64\\24.7\\gams.exe', 'dat': 'Dat'
+                                } 
+        self.mConfig['Recent'] = {'1':'','2':'','3':'','4':'','5':''}
+    
+    def load(self):
+        if Path( 'CrudeScheduler.config' ).exists():
+            #self.reset()
+            self.mConfig.read('CrudeScheduler.config') 
+        else:
+            print('[CrudeScheduler.config] is missing.')
+            
+    def save(self):          
+        with open('CrudeScheduler.config', 'w') as confile:
+            self.mConfig.write(confile)    
+    
+    def pushRecent(self,recentFile):
+        for N in range(1,6,1):
+            if self.mConfig['Recent']['{0}'.format(N)] == recentFile:
+                break
+        
+        for i in range(N,1,-1):
+            self.mConfig['Recent']['{0}'.format(i)] = self.mConfig['Recent']['{0}'.format(i-1)]
+        self.mConfig['Recent']['1'] = recentFile
+        
+
+    

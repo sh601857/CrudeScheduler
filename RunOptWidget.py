@@ -40,9 +40,10 @@ class RunOptWidget(QWidget):
             appPro.mLogWdg.logAppend('[GamsDat] not found',True)
             return        
         GenGamsDat.run(xlFile, GamsDatFolder)
+        appCon = AppProject.AppConfig()
+        p = subprocess.Popen([appCon.mConfig['Paths']['gams'], 'CrudeSchMOS_CZ_RunOP.gms', 'Lo=3'], bufsize=1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
+                              cwd= appPro.getPath('gms' , ''))
         
-        p = subprocess.Popen(['C:\\GAMS\\win64\\24.7\\gams.exe','CrudeSchMOS_CZ_RunOP.gms', 'Lo=3'], bufsize=1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
-                              cwd='D:\\cases\\ics\\ics2\\gms') 
         #p = subprocess.Popen(['dir'], shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1,
         #                              cwd='D:\\cases\\ics\\ics2\\gms') 
         for line in iter(p.stdout.readline, b''):

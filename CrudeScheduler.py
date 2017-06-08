@@ -21,7 +21,10 @@ class MainW(QtGui.QMainWindow):
         super(MainW, self).__init__()
         self.initUI()
 
-    def initUI(self):  
+    def initUI(self):
+        
+        appCon = AppProject.AppConfig()
+        appCon.load()
         
         self.setWindowIcon(QtGui.QIcon('CrudeScheduler.ico'))
         if (os.name == 'nt'):
@@ -122,10 +125,17 @@ class MainW(QtGui.QMainWindow):
         self.setWindowTitle( 'iCrudeScheduler[{0}]'.format( appPro.mFilePath ) )
         appPro.mLogWdg.clearLog()
         appPro.mLogWdg.logAppend( self.tr('Project [{0}] cteated.').format( appPro.mFilePath ) ,True)
+        appCon = AppProject.AppConfig()
+        appCon.pushRecent(appPro.mFilePath)        
         
     @QtCore.Slot()
-    def openProject(self):            
-        fileName = QtGui.QFileDialog.getOpenFileName( self, self.tr("Open project"), "", self.tr("iCrudeScheduler Project Files (*.icsp)") ) [0]
+    def openProject(self):
+        appCon = AppProject.AppConfig()
+        opDir = appCon.mConfig['Recent']['1']
+        if opDir!= u'':
+            opDir = str( Path(opDir).parent )
+        
+        fileName = QtGui.QFileDialog.getOpenFileName( self, self.tr("Open project"), opDir, self.tr("iCrudeScheduler Project Files (*.icsp)") ) [0]
         if fileName == '':
             return 
         print( fileName )
@@ -137,6 +147,7 @@ class MainW(QtGui.QMainWindow):
         self.setCensWgt(0)
         appPro.mLogWdg.clearLog()
         appPro.mLogWdg.logAppend( self.tr('Project [{0}] opend.').format( appPro.mFilePath ) ,True)
+        appCon.pushRecent(appPro.mFilePath)
         
     @QtCore.Slot()
     def closeProject(self):            
@@ -263,7 +274,13 @@ class MainW(QtGui.QMainWindow):
         toolbar = self.addToolBar(self.tr('Exit'))
         toolbar.addAction(exitAction)     
         
-        
+    def closeEvent(self, event):
+        if True:
+            appCon = AppProject.AppConfig()
+            appCon.save()            
+            event.accept()
+        else:
+            event.ignore()        
 def main():
 
     app = QtGui.QApplication(sys.argv)
