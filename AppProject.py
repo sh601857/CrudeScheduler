@@ -1,7 +1,9 @@
-#coding=utf-8 
+#coding=utf-8
 
+import sys, os
 import configparser
 from pathlib import Path
+import shutil
 import LogWidget
 
 class Singleton(type):
@@ -45,7 +47,20 @@ class AppProject(metaclass=Singleton):
                 dirPath = (profile.parent / self.mConfig['Paths'][key])
                 if not dirPath.exists() :
                     dirPath.mkdir()
-
+        else:
+            return  
+        appCon = AppConfig()
+        #copy dat files
+        dst = self.getPath('Excel','CrudeScheduler.xlsm')
+        src = '{0}\\dat\\CrudeScheduler.xlsm'.format( appCon.mbundle_dir )
+        shutil.copyfile(src, dst)
+        
+        gmsfiles = ['CrudeSchMOS_CZ_RunOP.gms','CrudeSchMOS_CZ_SolveN.gms','CrudeScheMOS_CZ_PostSolve.gms','cplex.opt','gms.gpr','aclear.bat']
+        for gmsf in gmsfiles:
+            dst = self.getPath('gms',gmsf)
+            src = '{1}\\dat\\{0}'.format(gmsf,appCon.mbundle_dir)
+            shutil.copyfile(src, dst)
+        
     def getPath(self,pathType,dfFileName):
         profile = Path( self.mFilePath )
         if self.mFilePath !='' and  profile.exists():
@@ -58,22 +73,28 @@ class AppConfig(metaclass=Singleton):
     def __init__(self):
         #super(AppProject, self).__init__() 
         self.mConfig = configparser.ConfigParser() 
-        self.reset()           
+        self.reset() 
+        if getattr(sys, 'frozen', False):
+            # we are running in a bundle
+            self.mbundle_dir = sys._MEIPASS
+        else:
+            # we are running in a normal Python environment
+            self.mbundle_dir = os.path.dirname(os.path.abspath(__file__))        
         
     def reset(self):
-        self.mConfig['Paths'] = {'gams': 'C:\\GAMS\\win64\\24.7\\gams.exe', 'dat': 'Dat'
+        self.mConfig['Paths'] = {'gams': 'C:\\GAMS\\win64\\24.7\\gams.exe', 'dat': 'dat'
                                 } 
         self.mConfig['Recent'] = {'1':'','2':'','3':'','4':'','5':''}
     
     def load(self):
-        if Path( 'CrudeScheduler.config' ).exists():
+        if Path( '{0}\\CrudeScheduler.config'.format(self.mbundle_dir) ).exists():
             #self.reset()
-            self.mConfig.read('CrudeScheduler.config') 
+            self.mConfig.read('{0}\\CrudeScheduler.config'.format(self.mbundle_dir)) 
         else:
-            print('[CrudeScheduler.config] is missing.')
+            print('[{0}\\CrudeScheduler.config] is missing.'.format(self.mbundle_dir))
             
     def save(self):          
-        with open('CrudeScheduler.config', 'w') as confile:
+        with open('{0}\\CrudeScheduler.config'.format(self.mbundle_dir), 'w') as confile:
             self.mConfig.write(confile)    
     
     def pushRecent(self,recentFile):

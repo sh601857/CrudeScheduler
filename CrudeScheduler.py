@@ -65,8 +65,11 @@ class MainW(QtGui.QMainWindow):
         elif wgtID == 2001:
             self.censw.setCurrentWidget(self.runOptWidget)
         elif 2002 == wgtID:
-            self.censw.setCurrentWidget(self.plotWidget)
-            self.plotWidget.loadData()
+            self.censw.setCurrentWidget(self.shecdulWidget)
+            self.shecdulWidget.loadData()
+        elif 2003 == wgtID:
+            self.censw.setCurrentWidget(self.invWidget)
+            self.invWidget.loadData()            
         else:
             self.censw.setCurrentWidget(self.emptyPageWidget)
             
@@ -110,13 +113,17 @@ class MainW(QtGui.QMainWindow):
                    
 
     @QtCore.Slot()
-    def newProject(self):            
+    def newProject(self):  
+        appPro = AppProject.AppProject()
         fileName = QtGui.QFileDialog.getSaveFileName(self, self.tr("New project"), "", self.tr("iCrudeScheduler Project Files (*.icsp)")  ) [0]
         if fileName == '':
             return 
-        print( fileName )
-        
-        appPro = AppProject.AppProject()
+
+        icsps = list( Path(fileName).parent.glob('*.icsp') )
+        if len(icsps) >0:
+            appPro.mLogWdg.logAppend( self.tr('Please select another folder.') ,True)
+            return
+
         appPro.mFilePath = fileName
         appPro.save()
         appPro.creatFolder()
@@ -184,6 +191,7 @@ class MainW(QtGui.QMainWindow):
         
         item = createItem({'text':'2.Optimization','ID':2001,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, })
         item.appendRow( createItem({'text':'Shecdule','ID':2002,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        item.appendRow( createItem({'text':'Inventory','ID':2003,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
         parentItem.appendRow(item)
   
         self.cmdTree = QtGui.QTreeView(self)
@@ -217,13 +225,15 @@ class MainW(QtGui.QMainWindow):
     def _createCentralWgt(self) :
 
         self.emptyPageWidget =  QtGui.QWidget()
-        self.plotWidget = PlotWidget.PlotWidget()
+        self.shecdulWidget = PlotWidget.PlotWidget( PlotWidget.ScheduleCanvas(self, width=5, height=4) )
+        self.invWidget = PlotWidget.PlotWidget( PlotWidget.TankInvCanvas(self, width=5, height=4) )
         self.runOptWidget = RunOptWidget.RunOptWidget()
     
         self.censw =  QtGui.QStackedWidget()
         self.censw.addWidget(self.emptyPageWidget)
         self.censw.addWidget(self.runOptWidget)
-        self.censw.addWidget(self.plotWidget)
+        self.censw.addWidget(self.shecdulWidget)
+        self.censw.addWidget(self.invWidget)
     
         self.censw.setCurrentIndex(0)
         self._curWgtID = 0

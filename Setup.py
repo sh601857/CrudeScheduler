@@ -26,4 +26,4 @@ setup(  name = "iCrudeScheduler",
 
 # copy dll lib\site-packages\numpy\core mkl_intel_thread.dll, mkl_*.dll, libiomp5md.dll
 
-# pyinstaller -w -i CrudeScheduler.ico  CrudeScheduler.py
+# pyinstaller -w -i CrudeScheduler.ico --add-data="CrudeScheduler.config;." --add-data="dat;dat" CrudeScheduler.py

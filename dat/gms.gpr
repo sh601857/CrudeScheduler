@@ -1,0 +1,17 @@
+[PROJECT]
+
+[RP:CRUDESCHMOS_CZ_RUNOP]
+1=
+
+[MRUFILES]
+1=D:\cases\ics\ics2\gms\CrudeSchMOS_CZ_RunOP.lst
+2=D:\cases\ics\ics2\Sol\MOS_CZ_TankInv.csv
+
+[OPENWINDOW_1]
+FILE0=D:\cases\ics\ics2\gms\CrudeSchMOS_CZ_RunOP.gms
+FILE1=D:\cases\ics\ics2\gms\CrudeSchMOS_CZ_RunOP.gms
+MAXIM=1
+TOP=50
+LEFT=50
+HEIGHT=400
+WIDTH=400
