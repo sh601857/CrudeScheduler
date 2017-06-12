@@ -125,7 +125,7 @@ class TankInvCanvas(FigureCanvas):
 
     def __init__(self, parent=None, width=9, height=6, dpi=None):
 
-        self.fig, self.axes = plt.subplots(nrows=2, ncols=2, figsize=(width, height), facecolor=(.94,.94,.94), dpi=dpi, sharex=True)
+        self.fig, self.axes = plt.subplots(nrows=2, ncols=3, figsize=(width, height),  facecolor=(.94,.94,.94), dpi=dpi, sharex=True)
         plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0.05, hspace=0.05)        
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)    
@@ -157,16 +157,23 @@ class TankInvCanvas(FigureCanvas):
         startDate = wb.sheets['Settings'].range('B2').value
 
         df = pd.read_csv(invFile, names=['Tank','n','TE','Vol'])
-        tanks = ['G181','G182','G183','G184']
+        tanks = ['G181','G182','G101','G183','G184','G102']
         for i in range(0,len(tanks)):
             df_u = df[df.Tank==tanks[i]]
-            ax = self.axes[i/2,i%2]
+            ax = self.axes[i//3,i%3]
+            ax.set_axis_bgcolor((.94,.94,.94))
             ax.plot(df_u.TE, df_u.Vol)
             ax.set_title(tanks[i])
-            ax.set_ylim( 0, 5.0 ) 
+            if i%3 == 2:
+                ax.set_ylim( 0, 1.5 )
+            else:
+                ax.set_ylim( 0, 5.0 ) 
             
         xtk = range(0, math.ceil(df['TE'].max() +1), 1 )
-        xtkl = [(startDate+timedelta(days=x)).strftime("%y/%m/%d %H:%M") for x in xtk]
+        #xtkl = [(startDate+timedelta(days=x)).strftime("%y/%m/%d %H:%M") for x in xtk]
+        xtkl = ['' for x in xtk]
+        xtkl[0] = (startDate+timedelta(days=xtk[0])).strftime("%y/%m/%d %H:%M")
+        xtkl[-1] = (startDate+timedelta(days=xtk[-1])).strftime("%y/%m/%d %H:%M")
         self.axes[0,0].set_xlim(df['TE'].min(), df['TE'].max())
         self.axes[0,0].set_xticks( xtk )
         self.axes[0,0].set_xticklabels( xtkl )        
