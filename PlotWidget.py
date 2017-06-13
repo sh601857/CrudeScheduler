@@ -176,7 +176,12 @@ class TankInvCanvas(FigureCanvas):
         xtkl[-1] = (startDate+timedelta(days=xtk[-1])).strftime("%y/%m/%d %H:%M")
         self.axes[0,0].set_xlim(df['TE'].min(), df['TE'].max())
         self.axes[0,0].set_xticks( xtk )
-        self.axes[0,0].set_xticklabels( xtkl )        
+        self.axes[0,0].set_xticklabels( xtkl, alpha=0.0 ) 
+        self.axes[0,1].set_xticklabels( xtkl, alpha=0.0 )
+        self.axes[0,2].set_xticklabels( xtkl, alpha=0.0 )
+        self.axes[1,0].set_xticklabels( xtkl )
+        self.axes[1,1].set_xticklabels( xtkl , alpha=0.0 )
+        self.axes[1,2].set_xticklabels( xtkl , alpha=0.0 )
 
         self.draw_idle()
 
