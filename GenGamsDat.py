@@ -8,20 +8,19 @@ def run(xlFile, GamsDatFolder):
     wb = xw.Book(xlFile)
     wb.api.Application.WindowState = -4140 # xlMinimized 
     
-    # file_WRR = open(GamsDatFolder + u'Set_WRR.dat', 'w')
-    # sht = wb.sheets['Operations']
-    # for i in range(2,100):    
-        # w=sht.range('A{0}'.format(i)).value
-        # if w != None:
-            # From = sht.range('B{0}'.format(i)).value
-            # if From.find(',') > 0:
-                # From='({0})'.format(From)
-            # To = sht.range('C{0}'.format(i)).value
-            # file_WRR.write('{0:.0f}.{1}.{2}\n'.format(w,From,To) )
-    
-        # else:
-            # break
-    # file_WRR.close()
+    file_WRR = open(GamsDatFolder + u'Set_WRR.dat', 'w')
+    sht = wb.sheets['Operations']
+    for i in range(2,100):    
+        w=sht.range('A{0}'.format(i)).value
+        if w != None:
+            From = sht.range('B{0}'.format(i)).value
+            if From.find(',') > 0:
+                From='({0})'.format(From)
+            To = sht.range('C{0}'.format(i)).value
+            file_WRR.write('{0:.0f}.{1}.{2}\n'.format(w,From,To) )
+        else:
+            break
+    file_WRR.close()
     
     file_Set_T = open( GamsDatFolder + u'Set_T.dat', 'w')
     setT = wb.sheets['Settings'].range('E2').value
@@ -123,12 +122,12 @@ def run(xlFile, GamsDatFolder):
     file_Par_XL = open(GamsDatFolder + u'Par_XL.dat', 'w')
     file_Par_XU = open(GamsDatFolder + u'Par_XU.dat', 'w')
     sht = wb.sheets['CDUs']
-    parH = wb.sheets['Settings'].range('D2').value
+    #parH = wb.sheets['Settings'].range('D2').value
     for i in range(2,100):    
         u = sht.range('A{0}'.format(i)).value
         if u != None:
-            file_Par_CDUDL.write('{0} {1:.4f} \n'.format(u, sht.range('B{0}'.format(i)).value / 10000.0 * parH) )
-            file_Par_CDUDU.write('{0} {1:.4f} \n'.format(u, sht.range('C{0}'.format(i)).value / 10000.0 * parH) )
+            file_Par_CDUDL.write('{0} {1:.4f} \n'.format(u, sht.range('J{0}'.format(i)).value / 10000.0 ) )
+            file_Par_CDUDU.write('{0} {1:.4f} \n'.format(u, sht.range('K{0}'.format(i)).value / 10000.0 ) )
             file_Par_XL.write('({0}).K1 {1:.4f}, {0}.K2 {2:.4f}\n'.format(sht.range('E{0}'.format(i)).value, sht.range('F{0}'.format(i)).value , sht.range('H{0}'.format(i)).value ) ) 
             file_Par_XU.write('({0}).K1 {1:.4f}, {0}.K2 {2:.4f}\n'.format(sht.range('E{0}'.format(i)).value, sht.range('G{0}'.format(i)).value , sht.range('I{0}'.format(i)).value ) ) 
         else:
