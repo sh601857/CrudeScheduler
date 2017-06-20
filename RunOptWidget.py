@@ -39,8 +39,12 @@ class RunOptWidget(QWidget):
         if xlFile == '' :
             appPro.mLogWdg.logAppend('[GamsDat] not found',True)
             return        
-        GenGamsDat.run(xlFile, GamsDatFolder)
+        GenGamsDat.run(xlFile, GamsDatFolder)       
         appCon = AppProject.AppConfig()
+        pd = subprocess.Popen([appCon.mConfig['Paths']['gams'], 'CrudeSchMOS_CZ_Data.gms', 'Lo=3'], bufsize=1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
+                              cwd= appPro.getPath('gms' , ''))        
+        pd.wait()
+        
         p = subprocess.Popen([appCon.mConfig['Paths']['gams'], 'CrudeSchMOS_CZ_RunOP.gms', 'Lo=3'], bufsize=1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
                               cwd= appPro.getPath('gms' , ''))
         

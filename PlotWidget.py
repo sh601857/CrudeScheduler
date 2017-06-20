@@ -104,7 +104,7 @@ class ScheduleCanvas(FigureCanvas):
         self.axes.set_xlim(df['TS'].min(), df['TE'].max())
         xtk = range(0, math.ceil(df['TE'].max() +1), 1 )
         xtkl = [(startDate+timedelta(days=x)).strftime("%y/%m/%d %H:%M") for x in xtk]
-        print(xtkl)
+        #print(xtkl)
         self.axes.set_xticks( xtk )
         self.axes.set_xticklabels( xtkl )
 
