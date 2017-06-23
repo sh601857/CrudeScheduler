@@ -6,13 +6,15 @@ import xlwings as xw
 def run(xlFile, GamsDatFolder):
 
     wb = xw.Book(xlFile)
-    wb.api.Application.WindowState = -4140 # xlMinimized 
+    wb.api.Application.WindowState = -4140 # xlMinimized
+    set_W = []
     
     file_WRR = open(GamsDatFolder + u'Set_WRR.dat', 'w')
     sht = wb.sheets['Operations']
     for i in range(2,100):    
         w=sht.range('A{0}'.format(i)).value
         if w != None:
+            set_W.append( w )
             From = sht.range('B{0}'.format(i)).value
             if From.find(',') > 0:
                 From='({0})'.format(From)
@@ -232,9 +234,34 @@ def run(xlFile, GamsDatFolder):
     file_Par_runOpTS.close()
     file_Par_runOpTE.close()
     file_Par_runOpV.close()
+
+    file_Par_preOpTS = open(GamsDatFolder + u'Par_preOpTS.dat', 'w')
+    file_Par_preOpTE = open(GamsDatFolder + u'Par_preOpTE.dat', 'w')
+    file_Par_preOpV  = open(GamsDatFolder + u'Par_preOpV.dat', 'w')     
+    file_WRR = open(GamsDatFolder + u'Set_WRR.dat', 'a')
+    sht = wb.sheets['PreSchOps']
+    for i in range(2,100):    
+        w = sht.range('B{0}'.format(i)).value
+        enable = sht.range('J{0}'.format(i)).value
+        if w != None and enable == 1: 
+            set_W.append( w )
+            file_Par_preOpTS.write('{0}  {1:.4f}\n'.format(w,sht.range('O{0}'.format(i)).value) )
+            file_Par_preOpTE.write('{0}  {1:.4f}\n'.format(w,sht.range('P{0}'.format(i)).value) )
+            file_Par_preOpV.write('{0}  {1:.4f}\n'.format(w,sht.range('I{0}'.format(i)).value / 10000.0) ) 
+            
+            From = sht.range('C{0}'.format(i)).value
+            To = sht.range('D{0}'.format(i)).value
+            if From != None and To != None:
+                if From.find(',') > 0:
+                    From='({0})'.format(From)
+                file_WRR.write('{0}.{1}.{2}\n'.format(w,From,To) )        
+    file_Par_preOpTS.close()
+    file_Par_preOpTE.close()
+    file_Par_preOpV.close() 
+    file_WRR.close()
     
     # wb.save()     
     # wb.close()
 
-#run(u'D:\\cases\\ics\\ics2\\Excel\\CrudeScheduler.xlsm', u'D:\\cases\\ics\\ics2\\gms\\GamsDat\\')
+run(u'D:\\cases\\ics\\ics2\\Excel\\CrudeScheduler.xlsm', u'D:\\cases\\ics\\ics2\\gms\\GamsDat\\')
 
