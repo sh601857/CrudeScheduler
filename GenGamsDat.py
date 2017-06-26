@@ -237,7 +237,10 @@ def run(xlFile, GamsDatFolder):
 
     file_Par_preOpTS = open(GamsDatFolder + u'Par_preOpTS.dat', 'w')
     file_Par_preOpTE = open(GamsDatFolder + u'Par_preOpTE.dat', 'w')
-    file_Par_preOpV  = open(GamsDatFolder + u'Par_preOpV.dat', 'w')     
+    file_Par_preOpV  = open(GamsDatFolder + u'Par_preOpV.dat', 'w') 
+    file_Par_preOpTCon  = open(GamsDatFolder + u'Par_preOpTCon.dat', 'w') 
+    file_Par_preOpNOM  = open(GamsDatFolder + u'Par_preOpNOM.dat', 'w') 
+    
     file_WRR = open(GamsDatFolder + u'Set_WRR.dat', 'a')
     sht = wb.sheets['PreSchOps']
     for i in range(2,100):    
@@ -248,20 +251,30 @@ def run(xlFile, GamsDatFolder):
             file_Par_preOpTS.write('{0}  {1:.4f}\n'.format(w,sht.range('O{0}'.format(i)).value) )
             file_Par_preOpTE.write('{0}  {1:.4f}\n'.format(w,sht.range('P{0}'.format(i)).value) )
             file_Par_preOpV.write('{0}  {1:.4f}\n'.format(w,sht.range('I{0}'.format(i)).value / 10000.0) ) 
+            if sht.range('K{0}'.format(i)).value == 'Range' :
+                file_Par_preOpTCon.write('{0}  {1:.0f}\n'.format(w,1) )
+            elif sht.range('K{0}'.format(i)).value == 'Fixed' :
+                file_Par_preOpTCon.write('{0}  {1:.0f}\n'.format(w,2) )
+            preNomOps = sht.range('H{0}'.format(i)).value
+            if preNomOps != None :
+                file_Par_preOpNOM.write('({1}).{0}\n'.format(w, preNomOps ) )
             
             From = sht.range('C{0}'.format(i)).value
             To = sht.range('D{0}'.format(i)).value
             if From != None and To != None:
                 if From.find(',') > 0:
                     From='({0})'.format(From)
-                file_WRR.write('{0}.{1}.{2}\n'.format(w,From,To) )        
+                file_WRR.write('{0}.{1}.{2}\n'.format(w,From,To) ) 
+                
     file_Par_preOpTS.close()
     file_Par_preOpTE.close()
     file_Par_preOpV.close() 
+    file_Par_preOpTCon.close()
+    file_Par_preOpNOM.close()
     file_WRR.close()
     
     # wb.save()     
     # wb.close()
 
-run(u'D:\\cases\\ics\\ics2\\Excel\\CrudeScheduler.xlsm', u'D:\\cases\\ics\\ics2\\gms\\GamsDat\\')
+#run(u'D:\\cases\\ics\\ics2\\Excel\\CrudeScheduler.xlsm', u'D:\\cases\\ics\\ics2\\gms\\GamsDat\\')
 

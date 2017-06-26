@@ -216,7 +216,7 @@ class MainW(QtGui.QMainWindow):
         self._dockLogWgt.setWidget( self.logWgt )
         self._dockLogWgt.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         self._dockLogWgt.setAllowedAreas(QtCore.Qt.BottomDockWidgetArea)
-        self._dockLogWgt.setFeatures( QtGui.QDockWidget.DockWidgetClosable | QtGui.QDockWidget.DockWidgetMovable | QtGui.QDockWidget.DockWidgetFloatable)
+        self._dockLogWgt.setFeatures( QtGui.QDockWidget.DockWidgetClosable | QtGui.QDockWidget.DockWidgetMovable | QtGui.QDockWidget.DockWidgetFloatable | QtGui.QDockWidget.DockWidgetVerticalTitleBar)
         self._dockLogWgt.setMinimumHeight(  60 )
         self._dockLogWgt.setMaximumHeight( 600 )
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self._dockLogWgt)
