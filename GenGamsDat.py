@@ -14,7 +14,7 @@ def run(xlFile, GamsDatFolder):
     for i in range(2,100):    
         w=sht.range('A{0}'.format(i)).value
         if w != None:
-            set_W.append( w )
+            #set_W.append( w )
             From = sht.range('B{0}'.format(i)).value
             if From.find(',') > 0:
                 From='({0})'.format(From)
@@ -176,10 +176,10 @@ def run(xlFile, GamsDatFolder):
             file_Par_maxN.write('{0}  {1}\n'.format(c,sht.range('D{0}'.format(i)).value) )
         else:
             break
-    file_Set_iCD.close()
-    file_Set_CarH.close()
-    file_Par_minN.close()
-    file_Par_maxN.close()
+    #file_Set_iCD.close()
+    #file_Set_CarH.close()
+    #file_Par_minN.close()
+    #file_Par_maxN.close()
     
     file_Set_iCDT1 = open(GamsDatFolder + u'Set_iCDT1.dat', 'w')
     file_Set_CarT1 = open(GamsDatFolder + u'Set_CarT1.dat', 'w')
@@ -240,6 +240,7 @@ def run(xlFile, GamsDatFolder):
     file_Par_preOpV  = open(GamsDatFolder + u'Par_preOpV.dat', 'w') 
     file_Par_preOpTCon  = open(GamsDatFolder + u'Par_preOpTCon.dat', 'w') 
     file_Par_preOpNOM  = open(GamsDatFolder + u'Par_preOpNOM.dat', 'w') 
+    file_Set_preOp  = open(GamsDatFolder + u'Set_preOp.dat', 'w') 
     
     file_WRR = open(GamsDatFolder + u'Set_WRR.dat', 'a')
     sht = wb.sheets['PreSchOps']
@@ -248,6 +249,12 @@ def run(xlFile, GamsDatFolder):
         enable = sht.range('J{0}'.format(i)).value
         if w != None and enable == 1: 
             set_W.append( w )
+            file_Set_preOp.write('{0}\n'.format(w) )
+            file_Set_iCD.write('{0}\n'.format(w) )
+            file_Set_CarH.write('{0}.{1}\n'.format(w,w) )
+            file_Par_minN.write('{0}  {1}\n'.format(w,1) )
+            file_Par_maxN.write('{0}  {1}\n'.format(w,1) )            
+                      
             file_Par_preOpTS.write('{0}  {1:.4f}\n'.format(w,sht.range('O{0}'.format(i)).value) )
             file_Par_preOpTE.write('{0}  {1:.4f}\n'.format(w,sht.range('P{0}'.format(i)).value) )
             file_Par_preOpV.write('{0}  {1:.4f}\n'.format(w,sht.range('I{0}'.format(i)).value / 10000.0) ) 
@@ -272,6 +279,12 @@ def run(xlFile, GamsDatFolder):
     file_Par_preOpTCon.close()
     file_Par_preOpNOM.close()
     file_WRR.close()
+    file_Set_preOp.close()
+    
+    file_Set_iCD.close()
+    file_Set_CarH.close()
+    file_Par_minN.close()
+    file_Par_maxN.close()    
     
     # wb.save()     
     # wb.close()
