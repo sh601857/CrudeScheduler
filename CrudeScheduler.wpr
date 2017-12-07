@@ -39,6 +39,15 @@ console.toolbox = [{'autosave': False,
                     'loc': u'D:\\GitHub\\CrudeScheduler\\GenGamsDat.py',
                     'pseudo_tty': False,
                     'raise_panel': True,
+                    'title': None},
+                   {'autosave': False,
+                    'id': 'cmd-nmEGnYVZwKpNuJYd',
+                    'io_encoding': None,
+                    'key_binding': None,
+                    'line_mode': True,
+                    'loc': u'D:\\GitHub\\CrudeScheduler\\PlotWidget.py',
+                    'pseudo_tty': False,
+                    'raise_panel': True,
                     'title': None}]
 proj.file-type = 'shared'
 proj.main-file = loc('CrudeScheduler.py')

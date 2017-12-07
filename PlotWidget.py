@@ -52,7 +52,22 @@ class ScheduleCanvas(FigureCanvas):
         wb = xw.Book(xlFile)
         wb.api.Application.WindowState = -4140 # xlMinimized  
         startDate = wb.sheets['Settings'].range('B2').value
-
+        
+        sht = wb.sheets['Plots']
+        cdus =[]
+        tanks=[]
+        for i in range(2,100):    
+            rv = sht.range('A{0}'.format(i)).value
+            if rv != None:
+                eutype = sht.range('B{0}'.format(i)).value
+                if  eutype == u'CDU':
+                    cdus.append( ( rv, sht.range('C{0}'.format(i)).value ) )
+                elif eutype == u'Tank':
+                    tanks.append( ( rv, sht.range('C{0}'.format(i)).value ) )
+            else:
+                break
+                
+        
         df = pd.read_csv(schFile, names=['From','To','n','TS','TE','Vol'])
         df.sort_values(by=['To','TS','From'], inplace=True)
         for i in range(1,len(df)):
@@ -62,7 +77,7 @@ class ScheduleCanvas(FigureCanvas):
                 df.iloc[i-1,5] = -1;
         df = df[df.Vol>0]
 
-        cdus = [('CDU1',1)]
+        #cdus = [('CDU1',1)]
         linewidth=2
         colors=['chocolate','grey']
         colorTankIn = 'c'
@@ -79,7 +94,7 @@ class ScheduleCanvas(FigureCanvas):
                 self.axes.bar(df_u.iloc[i,3], 0.2, width=df_u.iloc[i,4]-df_u.iloc[i,3], bottom=u[1]-0.1, color=colors[i%2], linewidth=0)
                 self.axes.text(df_u.iloc[i,3], u[1]-0.4, df_u.iloc[i,0],color=colors[i%2],)
 
-        tanks = [('G109',2),('G102',3),('G101',4),('G184',5),('G183',6),('G182',7),('G181',8),('V2',9),('V1',10)]   
+        #tanks = [('G109',2),('G102',3),('G101',4),('G184',5),('G183',6),('G182',7),('G181',8),('V2',9),('V1',10)]   
         for u in tanks :
             ytk.append(u[1])
             ytkl.append(u[0])    
@@ -123,7 +138,7 @@ class ScheduleCanvas(FigureCanvas):
 class TankInvCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
-    def __init__(self, parent=None, width=9, height=6, dpi=None):
+    def __init__(self, parent=None, width=9, height=12, dpi=None):
 
         self.fig, self.axes = plt.subplots(nrows=2, ncols=3, figsize=(width, height),  facecolor=(.94,.94,.94), dpi=dpi, sharex=True)
         plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0.05, hspace=0.05)        
