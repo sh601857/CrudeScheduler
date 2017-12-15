@@ -138,15 +138,28 @@ class ScheduleCanvas(FigureCanvas):
 class TankInvCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
-    def __init__(self, parent=None, width=9, height=12, dpi=None):
+    def __init__(self, parent=None, width=9, height=12, dpi=None, invRange='E1:H7'):
+        
+        self.fig = Figure(figsize=(width, height), facecolor=(.94,.94,.94), dpi=dpi)
+        
+        #self.axes = self.fig.subplots(nrows=2, ncols=3, sharex=True)
+        #self.fig.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0.05, hspace=0.05)  
+        self.axes=[]
+        
+        
+        self.axes.append( self.fig.add_axes([0.05, 0.55, 0.27, 0.4]) )
+        self.axes.append( self.fig.add_axes([0.35, 0.55, 0.27, 0.4]) )
+        self.axes.append( self.fig.add_axes([0.65, 0.55, 0.27, 0.4]) )
+        self.axes.append( self.fig.add_axes([0.05, 0.05, 0.27, 0.4]) )
+        self.axes.append( self.fig.add_axes([0.35, 0.05, 0.27, 0.4]) )
+        self.axes.append( self.fig.add_axes([0.65, 0.05, 0.27, 0.4]) )
 
-        self.fig, self.axes = plt.subplots(nrows=2, ncols=3, figsize=(width, height),  facecolor=(.94,.94,.94), dpi=dpi, sharex=True)
-        plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0.05, hspace=0.05)        
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)    
         FigureCanvas.setSizePolicy(self,QSizePolicy.Expanding,QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)  
-        self.compute_initial_figure()
+        self.tkscell=invRange
+        #self.compute_initial_figure()
 
         # contextMenu
         acExportPlot = QAction(self.tr("Export plot"), self)
@@ -155,7 +168,7 @@ class TankInvCanvas(FigureCanvas):
         FigureCanvas.setContextMenuPolicy(self, Qt.ActionsContextMenu )
 
     def compute_initial_figure(self):
-        for ax in self.axes.flat:
+        for ax in self.axes:
             ax.clear()
 
         appPro = AppProject.AppProject()
@@ -170,33 +183,42 @@ class TankInvCanvas(FigureCanvas):
         wb = xw.Book(xlFile)
         wb.api.Application.WindowState = -4140 # xlMinimized  
         startDate = wb.sheets['Settings'].range('B2').value
-
+        sht = wb.sheets['Plots']
+        
+        pdInv = sht.range(self.tkscell).options(pd.DataFrame).value
+        pdInv.dropna(inplace=True)
+        if len(pdInv) < 1:
+            return
+        tanks = pdInv['Tank'].values       
+        #tanks = ['G181','G182','G101','G183','G184','G102']
         df = pd.read_csv(invFile, names=['Tank','n','TE','Vol'])
-        tanks = ['G181','G182','G101','G183','G184','G102']
+
         for i in range(0,len(tanks)):
             df_u = df[df.Tank==tanks[i]]
-            ax = self.axes[i//3,i%3]
+            ax = self.axes[i]
             ax.set_axis_bgcolor((.94,.94,.94))
             ax.plot(df_u.TE, df_u.Vol)
             ax.set_title(tanks[i])
-            if i%3 == 2:
-                ax.set_ylim( 0, 1.5 )
-            else:
-                ax.set_ylim( 0, 5.0 ) 
+            ax.set_ylim( pdInv.loc[i,'ylowb'], pdInv.loc[i,'yupb'] )
+            
+            #if i%3 == 2:
+                #ax.set_ylim( 0, 1.5 )
+            #else:
+                #ax.set_ylim( 0, 5.0 ) 
             
         xtk = range(0, math.ceil(df['TE'].max() +1), 1 )
         #xtkl = [(startDate+timedelta(days=x)).strftime("%y/%m/%d %H:%M") for x in xtk]
         xtkl = ['' for x in xtk]
         xtkl[0] = (startDate+timedelta(days=xtk[0])).strftime("%y/%m/%d %H:%M")
         xtkl[-1] = (startDate+timedelta(days=xtk[-1])).strftime("%y/%m/%d %H:%M")
-        self.axes[0,0].set_xlim(df['TE'].min(), df['TE'].max())
-        self.axes[0,0].set_xticks( xtk )
-        self.axes[0,0].set_xticklabels( xtkl, alpha=0.0 ) 
-        self.axes[0,1].set_xticklabels( xtkl, alpha=0.0 )
-        self.axes[0,2].set_xticklabels( xtkl, alpha=0.0 )
-        self.axes[1,0].set_xticklabels( xtkl )
-        self.axes[1,1].set_xticklabels( xtkl , alpha=0.0 )
-        self.axes[1,2].set_xticklabels( xtkl , alpha=0.0 )
+        self.axes[0].set_xlim(df['TE'].min(), df['TE'].max())
+        self.axes[0].set_xticks( xtk )
+        self.axes[0].set_xticklabels( xtkl, alpha=0.0 ) 
+        self.axes[1].set_xticklabels( xtkl, alpha=0.0 )
+        self.axes[2].set_xticklabels( xtkl, alpha=0.0 )
+        self.axes[3].set_xticklabels( xtkl )
+        self.axes[4].set_xticklabels( xtkl , alpha=0.0 )
+        self.axes[5].set_xticklabels( xtkl , alpha=0.0 )
 
         self.draw_idle()
 

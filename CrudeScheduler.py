@@ -69,7 +69,10 @@ class MainW(QtGui.QMainWindow):
             self.shecdulWidget.loadData()
         elif 2003 == wgtID:
             self.censw.setCurrentWidget(self.invWidget)
-            self.invWidget.loadData()            
+            self.invWidget.loadData()   
+        elif 2004 == wgtID:
+            self.censw.setCurrentWidget(self.inv1Widget)
+            self.inv1Widget.loadData() 
         else:
             self.censw.setCurrentWidget(self.emptyPageWidget)
             
@@ -192,6 +195,7 @@ class MainW(QtGui.QMainWindow):
         item = createItem({'text':'2.Optimization','ID':2001,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, })
         item.appendRow( createItem({'text':'Shecdule','ID':2002,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
         item.appendRow( createItem({'text':'Inventory','ID':2003,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        item.appendRow( createItem({'text':'Inventory1','ID':2004,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
         parentItem.appendRow(item)
   
         self.cmdTree = QtGui.QTreeView(self)
@@ -227,6 +231,8 @@ class MainW(QtGui.QMainWindow):
         self.emptyPageWidget =  QtGui.QWidget()
         self.shecdulWidget = PlotWidget.PlotWidget( PlotWidget.ScheduleCanvas(self, width=5, height=4) )
         self.invWidget = PlotWidget.PlotWidget( PlotWidget.TankInvCanvas(self, width=5, height=4) )
+        
+        self.inv1Widget = PlotWidget.PlotWidget( PlotWidget.TankInvCanvas(self, width=5, height=4 , invRange='E11:H17') )       
         self.runOptWidget = RunOptWidget.RunOptWidget()
     
         self.censw =  QtGui.QStackedWidget()
@@ -234,7 +240,8 @@ class MainW(QtGui.QMainWindow):
         self.censw.addWidget(self.runOptWidget)
         self.censw.addWidget(self.shecdulWidget)
         self.censw.addWidget(self.invWidget)
-    
+        self.censw.addWidget(self.inv1Widget)
+        
         self.censw.setCurrentIndex(0)
         self._curWgtID = 0
     
