@@ -147,12 +147,12 @@ class TankInvCanvas(FigureCanvas):
         self.axes=[]
         
         
-        self.axes.append( self.fig.add_axes([0.05, 0.55, 0.27, 0.4]) )
-        self.axes.append( self.fig.add_axes([0.35, 0.55, 0.27, 0.4]) )
-        self.axes.append( self.fig.add_axes([0.65, 0.55, 0.27, 0.4]) )
-        self.axes.append( self.fig.add_axes([0.05, 0.05, 0.27, 0.4]) )
-        self.axes.append( self.fig.add_axes([0.35, 0.05, 0.27, 0.4]) )
-        self.axes.append( self.fig.add_axes([0.65, 0.05, 0.27, 0.4]) )
+        self.axes.append( self.fig.add_axes([0.05, 0.55, 0.28, 0.4]) )
+        self.axes.append( self.fig.add_axes([0.36, 0.55, 0.28, 0.4]) )
+        self.axes.append( self.fig.add_axes([0.67, 0.55, 0.28, 0.4]) )
+        self.axes.append( self.fig.add_axes([0.05, 0.05, 0.28, 0.4]) )
+        self.axes.append( self.fig.add_axes([0.36, 0.05, 0.28, 0.4]) )
+        self.axes.append( self.fig.add_axes([0.67, 0.05, 0.28, 0.4]) )
 
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)    
@@ -227,6 +227,78 @@ class TankInvCanvas(FigureCanvas):
         if fileName == '':   # No file selected
             return  
         self.fig.savefig( fileName, format='png' )         
+
+class CDUCKCanvas(FigureCanvas):
+    """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
+
+    def __init__(self, parent=None, width=9, height=12, dpi=None):
+        
+        self.fig = Figure(figsize=(width, height), facecolor=(.94,.94,.94), dpi=dpi)
+        self.axes=[]
+        
+        
+        self.axes.append( self.fig.add_axes([0.2, 0.55, 0.75, 0.4]) )
+        self.axes.append( self.fig.add_axes([0.2, 0.05, 0.75, 0.4] ,sharex=self.axes[0]) )
+
+
+        FigureCanvas.__init__(self, self.fig)
+        self.setParent(parent)    
+        FigureCanvas.setSizePolicy(self,QSizePolicy.Expanding,QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)  
+
+        #self.compute_initial_figure()
+
+        # contextMenu
+        acExportPlot = QAction(self.tr("Export plot"), self)
+        FigureCanvas.connect(acExportPlot,SIGNAL('triggered()'), self, SLOT('exportPlot()') )
+        FigureCanvas.addAction(self, acExportPlot )
+        FigureCanvas.setContextMenuPolicy(self, Qt.ActionsContextMenu )
+
+    def compute_initial_figure(self):
+        for ax in self.axes:
+            ax.clear()
+
+        appPro = AppProject.AppProject()
+        invFile=appPro.getPath('Sol', u'CDUFeedCK.csv')
+        if invFile == '' or Path( invFile ).exists() == False :   # No file
+            return 
+        xlFile = appPro.getPath('Excel' , 'CrudeScheduler.xlsm')
+        if xlFile == '' or Path( xlFile ).exists() == False:
+            return 
+        import xlwings as xw
+        from datetime import timedelta, datetime
+        wb = xw.Book(xlFile)
+        wb.api.Application.WindowState = -4140 # xlMinimized  
+        startDate = wb.sheets['Settings'].range('B2').value
+        sht = wb.sheets['Plots']
+        
+        pdCDUCK = sht.range('J1:M20').options(pd.DataFrame).value
+        pdCDUCK.dropna(inplace=True)
+        if len(pdCDUCK) < 1:
+            return
+        
+        df = pd.read_csv(invFile, names=['CDU','K','I','TS','TE','V'])
+        
+        
+        
+        xtk = range(0, math.ceil(df['TE'].max() +1), 1 )
+        #xtkl = [(startDate+timedelta(days=x)).strftime("%y/%m/%d %H:%M") for x in xtk]
+        xtkl = ['' for x in xtk]
+        xtkl[0] = (startDate+timedelta(days=xtk[0])).strftime("%y/%m/%d %H:%M")
+        xtkl[-1] = (startDate+timedelta(days=xtk[-1])).strftime("%y/%m/%d %H:%M")
+        self.axes[0].set_xlim(df['TE'].min(), df['TE'].max())
+        self.axes[0].set_xticks( xtk )        
+
+        self.draw_idle()
+
+    def exportPlot(self):  
+        fileName = QFileDialog.getSaveFileName( self, self.tr("Save figure"), "", ("PNG file (*.png)") ) [0]
+        if fileName == '':   # No file selected
+            return  
+        self.fig.savefig( fileName, format='png' )   
+
+
+
 
 class PlotWidget(QWidget):
     def __init__(self, canvas):
