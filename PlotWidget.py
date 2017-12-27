@@ -237,8 +237,10 @@ class CDUCKCanvas(FigureCanvas):
         self.axes=[]
         
         
-        self.axes.append( self.fig.add_axes([0.2, 0.55, 0.78, 0.4]) )
-        self.axes.append( self.fig.add_axes([0.2, 0.05, 0.78, 0.4] ,sharex=self.axes[0]) )
+        self.axes.append( self.fig.add_axes([0.15, 0.55, 0.83, 0.4] ) )
+        self.axes.append( self.fig.add_axes([0.15, 0.05, 0.83, 0.4] ,sharex=self.axes[0]) )
+        self.axes[0].set_axis_bgcolor((.94,.94,.94))
+        self.axes[1].set_axis_bgcolor((.94,.94,.94))
 
 
         FigureCanvas.__init__(self, self.fig)
@@ -253,6 +255,46 @@ class CDUCKCanvas(FigureCanvas):
         FigureCanvas.connect(acExportPlot,SIGNAL('triggered()'), self, SLOT('exportPlot()') )
         FigureCanvas.addAction(self, acExportPlot )
         FigureCanvas.setContextMenuPolicy(self, Qt.ActionsContextMenu )
+        
+        
+    def ax1CDURadio(self, label):
+        self.axPlot(self.axes[0], label, self.activeK1)
+        self.activeCDU1 = label
+        self.draw_idle() 
+        
+    def ax2CDURadio(self, label):
+        self.axPlot(self.axes[1], label, self.activeK2)
+        self.activeCDU2 = label
+        self.draw_idle()
+        
+    def ax1KRadio(self, label):
+        self.axPlot(self.axes[0], self.activeCDU1, label)
+        self.activeK1=label
+        self.draw_idle()
+        
+    def ax2KRadio(self, label):
+        self.axPlot(self.axes[1], self.activeCDU2, label)
+        self.activeK2=label
+        self.draw_idle()
+        
+    def axPlot(self, ax, cdu1, k1):       
+        for i, line in enumerate(ax.lines):
+            #ax.lines.pop(i)
+            line.remove()
+        dfc1 = self.df[self.df.CDU==cdu1]
+        dfc1 = dfc1[dfc1.K == k1]
+        if len(dfc1) < 2:
+            return
+        cX=[]
+        cY=[]        
+        for i in range( len(dfc1)):
+            cX.append( dfc1.iloc[i,3] )
+            cX.append( dfc1.iloc[i,4] )
+            cY.append( dfc1.iloc[i,5] )
+            cY.append( dfc1.iloc[i,5] )
+        ax.plot( cX, cY , label=k1, linewidth=2.0, color='b')
+        ax.set_title( "{0}_{1}".format(cdu1,k1)  )
+        ax.set_ylim( self.pdCDUCK.loc[(cdu1,k1),'ylowb'] , self.pdCDUCK.loc[(cdu1,k1),'yupb'] )
 
     def compute_initial_figure(self):
         for ax in self.axes:
@@ -272,60 +314,68 @@ class CDUCKCanvas(FigureCanvas):
         startDate = wb.sheets['Settings'].range('B2').value
         sht = wb.sheets['Plots']
          
-        pdCDUCK = sht.range('J1:M20').options(pd.DataFrame, index=2).value
-        pdCDUCK.dropna(inplace=True)
-        if len(pdCDUCK) < 1:
+        self.pdCDUCK = sht.range('J1:M20').options(pd.DataFrame, index=2).value
+        self.pdCDUCK.dropna(inplace=True)
+        if len(self.pdCDUCK) < 1:
             return
+        self.CDUs = self.pdCDUCK.index.get_level_values(0).values
+        self.Ks = self.pdCDUCK.index.get_level_values(1).values
+        self.CDUs = list(set(self.CDUs)) 
+        self.Ks = list(set(self.Ks)) 
         
-        rax1 = self.fig.add_axes([0.01, 0.55, 0.15, 0.30])
-        radioCdu1 = RadioButtons(rax1, ['K1', 'K2'])  
-        #radioCdu1.on_clicked(yh1func)        
+        if len(self.CDUs) >1:
+            rax1 = self.fig.add_axes([0.01, 0.80, 0.15, 0.20], frameon=False)
+            rax1.set_axis_bgcolor((.94,.94,.94))
+            self.radioCDU1 = RadioButtons(rax1, self.CDUs)  
+            #self.radioCDU1.set_active(0)
+            self.radioCDU1.on_clicked(self.ax1CDURadio)        
+            
+            rax2 = self.fig.add_axes([0.01, 0.30, 0.15, 0.20], frameon=False)
+            rax2.set_axis_bgcolor((.94,.94,.94))
+            self.radioCDU2 = RadioButtons(rax2, self.CDUs) 
+            #self.radioCDU2.set_active(1)
+            self.radioCDU2.on_clicked(self.ax2CDURadio) 
+        
+        if len(self.Ks) >1:
+            rax1 = self.fig.add_axes([0.01, 0.50, 0.15, 0.30], frameon=False)
+            rax1.set_axis_bgcolor((.94,.94,.94))
+            self.radioK1 = RadioButtons(rax1, self.Ks)  
+            #self.radioK1.set_active(0)
+            self.radioK1.on_clicked(self.ax1KRadio)        
+            
+            rax2 = self.fig.add_axes([0.01, 0.00, 0.15, 0.30], frameon=False)
+            rax2.set_axis_bgcolor((.94,.94,.94))
+            self.radioK2 = RadioButtons(rax2, self.Ks) 
+            #self.radioK2.set_active(1)
+            self.radioK2.on_clicked(self.ax2KRadio) 
         
         
-        df = pd.read_csv(invFile, names=['CDU','K','I','TS','TE','V'])
-        if len(df) < 2:
+        
+        
+        self.df = pd.read_csv(invFile, names=['CDU','K','I','TS','TE','V'])
+        if len(self.df) < 2:
             return        
-        cdu1 = 'CDU1'
-        k1 = 'K1'
         
-        dfc1 = df[df.CDU==cdu1]
-        dfc1 = dfc1[df.K == k1]
-        if len(dfc1) < 2:
-            return
-        cX=[]
-        cY=[]        
-        for i in range( len(dfc1)):
-            cX.append( dfc1.iloc[i,3] )
-            cX.append( dfc1.iloc[i,4] )
-            cY.append( dfc1.iloc[i,5] )
-            cY.append( dfc1.iloc[i,5] )
-        self.axes[0].plot( cX, cY , label=k1, linewidth=2.0)
-        self.axes[0].set_title( "{0}_{1}".format(cdu1,k1)  )
-        self.axes[0].set_ylim( pdCDUCK.loc[(cdu1,k1),'ylowb'] , pdCDUCK.loc[(cdu1,k1),'yupb'] )
-
-        xtk = range(0, math.ceil(dfc1['TE'].max() +1), 1 )
+        self.axPlot(self.axes[0], self.CDUs[0], self.Ks[0] )
+        self.activeCDU1 = self.CDUs[0]
+        self.activeK1 = self.Ks[0]
+        
+        if len(self.CDUs) >1:
+            self.axPlot(self.axes[1], self.CDUs[1], self.Ks[0])
+            self.activeCDU2 = self.CDUs[1]
+            self.activeK2 = self.Ks[0]            
+        else:
+            if len(self.Ks) >1:
+                self.axPlot(self.axes[1], self.CDUs[0], self.Ks[1])
+                self.activeCDU2 = self.CDUs[0]
+                self.activeK2 = self.Ks[1]                   
+                
+        xtk = range(0, math.ceil(self.df['TE'].max() +1), 1 )
         xtkl = [(startDate+timedelta(days=x)).strftime("%m/%d %H:%M") for x in xtk]
-        self.axes[0].set_xlim(dfc1['TS'].min(), dfc1['TE'].max())
+        self.axes[0].set_xlim(self.df['TS'].min(), self.df['TE'].max())
         self.axes[0].set_xticks( xtk )        
         self.axes[0].set_xticklabels( xtkl, alpha=0.0 ) 
         self.axes[1].set_xticklabels( xtkl)         
-        
-        cdu2 = 'CDU1'
-        k2 = 'K2'        
-        dfc2 = df[df.CDU==cdu2]
-        dfc2 = dfc2[df.K == k2]
-        if len(dfc2) < 2:
-            return
-        cX=[]
-        cY=[]        
-        for i in range( len(dfc2)):
-            cX.append( dfc2.iloc[i,3] )
-            cX.append( dfc2.iloc[i,4] )
-            cY.append( dfc2.iloc[i,5] )
-            cY.append( dfc2.iloc[i,5] )
-        self.axes[1].plot( cX, cY , label=k2, linewidth=2.0)        
-        self.axes[1].set_title( "{0}_{1}".format(cdu2,k2)  )
-        self.axes[1].set_ylim( pdCDUCK.loc[(cdu2,k2),'ylowb'] , pdCDUCK.loc[(cdu2,k2),'yupb'] )
         
         self.draw_idle()
 
