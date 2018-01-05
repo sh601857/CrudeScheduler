@@ -17,15 +17,16 @@ E
 /
     C     /A,B,C,D,E,F/
     K     /K1,K2/
-    W     /1*17/
+    W     /1*17
+$include GamsDat/Set_preOp.dat
+/
     WU(W) /15*17/
     WT(W) /4*14/
     WD(W) /1*3/
     R     /V1,V2,V3, G181*G184, G101*G102,G109,TL,BL,CDU1/
     TK(R)    tanks         /G181*G184,G101*G102,G109/
     RV(R)    vessels       /V1,V2,V3/
-    RS(TK)   storage tank  /G181*G184/
-    RC(TK)   charging tank /G101*G102,G109/
+    RC(TK)   charging tank /G101*G102/
     RD(R)    CDU           /CDU1 /
     RL(R)    Pipeline      /TL,BL  /
     FCR(R)   fixed crude   /V1,V2,V3/
@@ -38,21 +39,22 @@ ALIAS(T,T1,T2);  ALIAS(I,I1,I2);  ALIAS(N,N1,N2);
 ALIAS(RV,RV1,RV2);
 
 SETS
-    WRR(W,R1,R2) Operations and Units   / 1.G101.CDU1, 2.G102.CDU1, 3.G109.CDU1, 4.BL.G101, 5.BL.G102, 6.BL.G109,
-    7.G181.BL, 8.G182.BL, 9.G183.BL, 10.G184.BL, 11.TL.G181, 12.TL.G182, 13.TL.G183, 14.TL.G184,
-    15.V1.TL, 16.V2.TL, 17.V3.TL /
-    NOM(W1,W2)   non-overlapping matrix /1.2, 1.3, 2.3, 1.4, 2.5, 3.6, 7.11, 8.12, 9.13, 10.14, 15.16, 15.17, 16.17/
-    iCW  CLIQUE / 1*9 /
+    WRR(W,R1,R2) Operations and Units   /
+$include GamsDat/Set_WRR.dat
+/
+    NOM(W1,W2)   non-overlapping matrix /
+$include GamsDat/Set_NOM.dat
+/
+;
+
+loop( (W,R1,R2)$WRR(W,R1,R2),  INr(R2,W) = yes;  OUr(R1,W) = yes; );
+
+SETS
+    iCW  CLIQUE /
+$include GamsDat/Set_iCW.dat
+/
     CWW(iCW,W)   /
-1.(1 ,2 ,3)
-2.(1 ,4)
-3.(5 ,2)
-4.(6 ,3)
-5.(7 ,11)
-6.(8 ,12)
-7.(9 ,13)
-8.(10 ,14)
-9.(15 ,16 ,17)
+$include GamsDat/Set_CWW.dat
 /
     iCD    cardinality /
 $include GamsDat/Set_iCD.dat
@@ -72,9 +74,6 @@ $include GamsDat/Set_iCDT.dat
     CarT( iCDT, W ) /
 $include GamsDat/Set_CarT.dat
 /
-;
-
-loop( (W,R1,R2)$WRR(W,R1,R2),  INr(R2,W) = yes;  OUr(R1,W) = yes; );
 ;
 
 PARAMETERS
@@ -157,16 +156,30 @@ $include GamsDat/Par_G.dat
     DURL(W) duration limits /
 $include GamsDat/Par_DURL.dat
 /
-    runOpTS(W) running oprations TS /
+    runOpTS(W) running operations TS /
 $include GamsDat/Par_runOpTS.dat
 /
-    runOpTE(W) running oprations TE /
+    runOpTE(W) running operations TE /
 $include GamsDat/Par_runOpTE.dat
 /
-    runOpV(W) running oprations Vol /
+    runOpV(W) running operations Vol /
 $include GamsDat/Par_runOpV.dat
 /
-    SL(WU) the minimum start time of unloading operation days
+    preOpTS(W) pre-scheduled operations TS /
+$include GamsDat/Par_preOpTS.dat
+/
+    preOpTE(W) pre-scheduled operations TE /
+$include GamsDat/Par_preOpTE.dat
+/
+    preOpTCon(W) pre-scheduled operations TCon /
+$include GamsDat/Par_preOpTCon.dat
+/
+    preOpV(W) pre-scheduled operations TV /
+$include GamsDat/Par_preOpV.dat
+/
+    SL(W) the minimum start time of operation days /
+$include GamsDat/Par_preOpTS.dat
+/
     TLHU(R) the max level of R at the end of H
     runOpRemainV(W)
     runOpRemainVC(W,C)
@@ -179,7 +192,7 @@ loop(W$(runOpTE(W)>0), runOpRemainV(W) = runOpV(W) * runOpTE(W) / (runOpTE(W)-ru
 loop((W,C)$(runOpTE(W)>0), runOpRemainVC(W,C) = sum(R$(OUr(R,W) and TL0(R) > 0.0001 ), runOpRemainV(W) * TCL0(R,C) / TL0(R) ) ) ;
 
 loop((W,RL,C)$(OUr(RL,W) and runOpTE(W)>0) , runOpRemainVC(W,C) = sum(W1$(INr(RL,W1)), runOpRemainVC(W1,C) )  );
-
+loop(W$(preOpV(W)>0.0 ),  VL(W) = preOpV(W); VU(W) = preOpV(W) );
 *display  runOpRemainVC;
 
 TLL(RV) = 0.0 ;   TLU(RV) = TL0(RV) ;    TLL(RL) = 0.0 ;   TLU(RL) = 0.0 ;
@@ -215,6 +228,8 @@ Lc.fx('E',RL,C) = 0.0;
 
 S.up(T,W) = H;  E.up(T,W) = H;
 loop((T,W,RV,R)$WRR(W,RV,R), E.up(T,W) = RVLT(RV); );
+loop((T,W)$(preOpTE(W)>0.0), E.up(T,W) = preOpTE(W); );
+
 Vt.up(T,W) = VU(W);
 Vc.up(T,W,C) = VU(W);
 loop((T,W,RV,R,C)$WRR(W,RV,R), Vc.up(T,W,C)= TCL0(RV,C); );
@@ -224,13 +239,13 @@ Lc.up(T,RV,C) = TCL0(RV,C);
 Lc.fx(T,RL,C) = 0.0;
 
 variables
-    fobj
+    fobj, profit, ppp
 ;
 
 EQUATIONS
 
-EQOBJ
-IEQSL(T,WU)
+EQOBJ,EQProfit,EQPPP
+IEQSL(T,W)
 IEQEU(T,W)
 EQSED(T,W)
 IEQDURL(T,W)
@@ -270,6 +285,7 @@ IEQLtLBLastV(T,R)
 EQLtSumRC
 EQCDUDemandLB(RD)
 EQCDUDemandUB(RD)
+EQpreOpTE(W), EQpreOpTS(W), EQpreOpV(W)
 
 IEQCliqueConst1(T,iCW)
 IEQCliqueConst2(I1,I2,iCW),IEQCliqueTrTimeConst(I1,I2,R)
@@ -278,11 +294,15 @@ IEQNoEmptySlot(T,W)
 
 ;
 
-EQOBJ..   fobj=e=sum((T,RD,W,C)$(INr(RD,W)),G(C)*Vc(T,W,C))
-               + sum((RC,RD,W,C)$( WRR(W,RC,RD) and runOpRemainV(W)>0 ), G(C)* runOpRemainVC(W,C) ) ;
+EQOBJ..   fobj =e= profit - ppp ;
+
+EQProfit..  profit =e= sum((T,RD,W,C)$(INr(RD,W)),G(C)*Vc(T,W,C))
+               + sum((R,RD,W,C)$( WRR(W,R,RD) and runOpRemainV(W)>0 ), G(C)* runOpRemainVC(W,C) ) ;
+EQPPP..    ppp =e=  0.0 ;
+*0.01 * sum( (T,W)$(OUr('BL',W)) , S(T,W) );
 
 *----------------------------
-IEQSL(T,WU)..   S(T,WU)=G=SL(WU)*Z(T,WU);
+IEQSL(T,W)$(SL(W)>0.0)..    S(T,W) =G= SL(W)*Z(T,W);
 IEQEU(T,W)..    E(T,W)=L=H*Z(T,W);
 EQSED(T,W)..    E(T,W)=E=S(T,W)+D(T,W);
 IEQDURL(T,W)..  D(T,W)=G=Z(T,W)*DURL(W);
@@ -337,16 +357,21 @@ EQLtSumRC..  sum(RC, Lt('E',RC) ) =g= VL('1') + sum(RC, TLL(RC) );
 
 
 *------------------flowrate limitations that link volume and duration variables
-IEQVtFLB(T,W)..    Vt(T,W)=G=FRL(W)*D(T,W);
-IEQVtFUB(T,W)..    Vt(T,W)=L=FRU(W)*D(T,W);
+IEQVtFLB(T,W)$(FRL(W)>0.0001)..    Vt(T,W)=G=FRL(W)*D(T,W);
+IEQVtFUB(T,W)$( preOpTE(W)= 0.0 )..    Vt(T,W)=L=FRU(W)*D(T,W);
 
 *------------------product specifications
 IEQProdSpecLB(T,WD,K)..   XL(WD,K)*Vt(T,WD)=L=sum(C,X(C,K)*Vc(T,WD,C));
 IEQProdSpecUB(T,WD,K)..   XU(WD,K)*Vt(T,WD)=G=sum(C,X(C,K)*Vc(T,WD,C));
 
 *------------------CDU demanding limitations
-EQCDUDemandLB(RD)..      sum((T,INr(RD,WD)),Vt(T,WD)) + sum(W$INr(RD,W), runOpRemainV(W) ) =G= CDUDL(RD);
-EQCDUDemandUB(RD)..      sum((T,INr(RD,WD)),Vt(T,WD)) + sum(W$INr(RD,W), runOpRemainV(W) ) =L= CDUDL(RD);
+EQCDUDemandLB(RD)..      sum((T,INr(RD,W)),Vt(T,W)) + sum(W$INr(RD,W), runOpRemainV(W) ) =G= CDUDL(RD);
+EQCDUDemandUB(RD)..      sum((T,INr(RD,W)),Vt(T,W)) + sum(W$INr(RD,W), runOpRemainV(W) ) =L= CDUDL(RD);
+
+*--------Pre-Scheduled Operations----
+EQpreOpTE(W)$( preOpTCon(W)=2 ).. sum(T, E(T,W) )  =e= preOpTE(W);
+EQpreOpTS(W)$( preOpTCon(W)=2 ).. sum(T, S(T,W) )  =e= preOpTS(W);
+EQpreOpV(W)$(  preOpV(W)>0.0  ).. sum(T, Vt(T,W) ) =e= preOpV(W);
 
 *-----------------strengthened constraints
 IEQCliqueConst1(T,iCW)..  sum(W$CWW(iCW,W),Z(T,W)) =l= 1;
@@ -371,7 +396,7 @@ EQCompMBNL(T,TK,W,C)$(OUr(TK,W))..    Vc(T,W,C)*Lt(T,TK)=E=Lc(T,TK,C)*Vt(T,W);
 Option MIP=CPLEX;
 option optcr=0
 MODEL BasicModel /
-EQOBJ
+EQOBJ,EQProfit,EQPPP
 EQSED
 EQPipeInGeOut
 EQPipeInOutTSG,EQPipeInOutTSL,EQPipeInOutTEG,EQPipeInOutTEL
@@ -380,17 +405,13 @@ EBlenComL,EBlenComU
 IEQUnloadingTimePreced
 EQCDUNoInt
 EQVtMB
-EQTankLevel
-EQTankCLevel
+EQTankLevel, EQTankCLevel
 IEQLtLBLastV , EQLtSumRC
 EQTankMB
-IEQVtFLB
-IEQVtFUB
-IEQProdSpecLB
-IEQProdSpecUB
-
-EQCDUDemandLB
-EQCDUDemandUB
+IEQVtFLB,IEQVtFUB
+IEQProdSpecLB,IEQProdSpecUB
+EQCDUDemandLB,EQCDUDemandUB
+EQpreOpTE,EQpreOpTS,EQpreOpV
 /
 ;
 
@@ -418,7 +439,8 @@ $include CrudeSchMOS_CZ_SolveN.gms
 $include CrudeScheMOS_CZ_PostSolve.gms
 
 *** Check ***
-Scalar valueTemp /0/
+Scalar valueTemp /0/ ;
+
 file  check / "check.csv" / ;
 put check;
 loop( (T,R,W,C)$(OUr(R,W)),
@@ -449,6 +471,23 @@ LOOP(R,
 );
 PUTCLOSE TankInv;
 
+Scalar STemp /0/ ;
+Scalar ETemp /0/ ;
+file  CDUFeedCK / ..\\Sol\\CDUFeedCK.csv / ;
+*CDUFeedCK.ap = 1 ;
+put CDUFeedCK;
+loop((RD,K,I),
+     valueTemp = sum((W)$(INr(RD,W)), Z.l(I,W) ) ;
+     if( valueTemp > 0.1,
+       STemp = sum((W)$(INr(RD,W)), Z.l(I,W) * S.l(I,W) ) / valueTemp;
+       ETemp = sum((W)$(INr(RD,W)), Z.l(I,W) * E.l(I,W) ) / valueTemp;
+       valueTemp = sum((W)$(INr(RD,W)), Vt.l(I,W));
+       if( valueTemp > 0.01, valueTemp = sum((W,C)$(INr(RD,W)), X(C,K)*Vc.l(I,W,C) ) / valueTemp  ;
+         put RD.tl:0, ',', K.tl:0, ',',  I.tl:0, ',', STemp:0:3, ',', ETemp:0:3,',', valueTemp:0:6 /;
+       );
+     );
+);
+PUTCLOSE CDUFeedCK;
 
 
 

@@ -153,6 +153,8 @@ class TankInvCanvas(FigureCanvas):
         self.axes.append( self.fig.add_axes([0.05, 0.05, 0.28, 0.4]) )
         self.axes.append( self.fig.add_axes([0.36, 0.05, 0.28, 0.4]) )
         self.axes.append( self.fig.add_axes([0.67, 0.05, 0.28, 0.4]) )
+        for ax in self.axes:
+            ax.set_axis_bgcolor((.94,.94,.94))
 
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)    
@@ -196,7 +198,7 @@ class TankInvCanvas(FigureCanvas):
         for i in range(0,len(tanks)):
             df_u = df[df.Tank==tanks[i]]
             ax = self.axes[i]
-            ax.set_axis_bgcolor((.94,.94,.94))
+            
             ax.plot(df_u.TE, df_u.Vol)
             ax.set_title(tanks[i])
             ax.set_ylim( pdInv.loc[i,'ylowb'], pdInv.loc[i,'yupb'] )

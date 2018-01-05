@@ -1,5 +1,6 @@
 #coding=utf-8 
 
+from pathlib import Path
 import pandas as pd
 import xlwings as xw
 
@@ -8,6 +9,10 @@ def run(xlFile, GamsDatFolder):
     wb = xw.Book(xlFile)
     wb.api.Application.WindowState = -4140 # xlMinimized
     set_W = []
+    
+    gamsdatf = Path(GamsDatFolder)
+    if not gamsdatf.exists() :
+        gamsdatf.mkdir()
     
     file_WRR = open(GamsDatFolder + u'Set_WRR.dat', 'w')
     sht = wb.sheets['Operations']

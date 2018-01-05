@@ -3,7 +3,7 @@ CrudeSchMILP.optfile=1;
 option optcr=0
 Solve  CrudeSchMILP  maximizing fobj using MIP;
 
-set soln           possible solutions in the solution pool /file1*file10/
+set soln           possible solutions in the solution pool /file1*file20/
     solnpool(soln) actual solutions;
 file fsol;
 

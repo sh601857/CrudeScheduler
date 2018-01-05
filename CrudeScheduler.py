@@ -62,18 +62,18 @@ class MainW(QtGui.QMainWindow):
             #self.censw.setCurrentWidget(self.simSpecWgt)
             #self.simSpecWgt.loadData()   
             pass
-        elif wgtID == 2001:
+        elif wgtID == 3001:
             self.censw.setCurrentWidget(self.runOptWidget)
-        elif 2002 == wgtID:
+        elif 3002 == wgtID:
             self.censw.setCurrentWidget(self.shecdulWidget)
             self.shecdulWidget.loadData()
-        elif 2003 == wgtID:
+        elif 3003 == wgtID:
             self.censw.setCurrentWidget(self.invWidget)
             self.invWidget.loadData()   
-        elif 2004 == wgtID:
+        elif 3004 == wgtID:
             self.censw.setCurrentWidget(self.inv1Widget)
             self.inv1Widget.loadData() 
-        elif 2005 == wgtID:
+        elif 3005 == wgtID:
             self.censw.setCurrentWidget(self.CDUKWidget)
             self.CDUKWidget.loadData()             
         else:
@@ -101,7 +101,25 @@ class MainW(QtGui.QMainWindow):
             activeSheetName = 'CDUs' 
         elif wgtID == 1005:
             activeSheetName = 'Operations' 
+        elif wgtID == 1006:
+            activeSheetName = 'Card' 
+        elif wgtID == 1007:
+            activeSheetName = 'Plots' 
+            
         elif wgtID == 2001:
+            activeSheetName = 'Settings'    
+        elif wgtID == 2002:
+            activeSheetName = 'CrudeReceipts'  
+        elif wgtID == 2003:
+            activeSheetName = 'RuningOps'
+        elif wgtID == 2004:
+            activeSheetName = 'PreSchOps'
+        elif wgtID == 2005:
+            activeSheetName = 'Tanks'
+        elif wgtID == 2006:
+            activeSheetName = 'CDUs'            
+            
+        elif wgtID == 3001:
             if( self._curWgtID != wgtID):        
                 self.setCensWgt(wgtID)  
                 
@@ -187,19 +205,33 @@ class MainW(QtGui.QMainWindow):
         # create commonds tree  
         self.cmdmodel = QtGui.QStandardItemModel()
         parentItem = self.cmdmodel.invisibleRootItem()            
-        item = createItem({'text':'1.Specification','ID':1001,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, })
+        item = createItem({'text':'1.Site','ID':1001,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, })
         item.appendRow( createItem({'text':'Crudes','ID':1001,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
         item.appendRow( createItem({'text':'Tanks', 'ID':1002,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
         item.appendRow( createItem({'text':'Pipelines', 'ID':1003,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
         item.appendRow( createItem({'text':'CDUS', 'ID':1004,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
         item.appendRow( createItem({'text':'Operations', 'ID':1005,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        item.appendRow( createItem({'text':'Cardinalities', 'ID':1006,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        #item.appendRow( createItem({'text':'CBlends', 'ID':1008,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        item.appendRow( createItem({'text':'Plots', 'ID':1007,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        
         parentItem.appendRow(item)
         
-        item = createItem({'text':'2.Optimization','ID':2001,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, })
-        item.appendRow( createItem({'text':'Shecdule','ID':2002,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
-        item.appendRow( createItem({'text':'Inventory','ID':2003,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
-        item.appendRow( createItem({'text':'Inventory1','ID':2004,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
-        item.appendRow( createItem({'text':'CDU_K','ID':2005,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        item = createItem({'text':'2.Case','ID':2001,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, })
+        item.appendRow( createItem({'text':'Settings','ID':2001,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        item.appendRow( createItem({'text':'Crude Receipts', 'ID':2002,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        item.appendRow( createItem({'text':'Runing Operations', 'ID':2003,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        item.appendRow( createItem({'text':'Pre-Scheduled Operations', 'ID':2004,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        item.appendRow( createItem({'text':'Tank Inventory', 'ID':2005,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        item.appendRow( createItem({'text':'CDU Demands', 'ID':2006,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+
+        parentItem.appendRow(item)        
+        
+        item = createItem({'text':'3.Optimization','ID':3001,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, })
+        item.appendRow( createItem({'text':'Shecdule','ID':3002,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        item.appendRow( createItem({'text':'Inventory','ID':3003,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        item.appendRow( createItem({'text':'Inventory1','ID':3004,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
+        item.appendRow( createItem({'text':'CDU_K','ID':3005,'Flags': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled, }) )
         
         parentItem.appendRow(item)
   

@@ -55,7 +55,7 @@ class AppProject(metaclass=Singleton):
         src = '{0}\\dat\\CrudeScheduler.xlsm'.format( appCon.mbundle_dir )
         shutil.copyfile(src, dst)
         
-        gmsfiles = ['CrudeSchMOS_CZ_RunOP.gms','CrudeSchMOS_CZ_SolveN.gms','CrudeScheMOS_CZ_PostSolve.gms','cplex.opt','gms.gpr','aclear.bat']
+        gmsfiles = ['CrudeSchMOS_CZ_Data.gms','CrudeSchMOS_CZ_RunOP.gms','CrudeSchMOS_CZ_SolveN.gms','CrudeScheMOS_CZ_PostSolve.gms','cplex.opt','gms.gpr','aclear.bat','MaximalClique.py']
         for gmsf in gmsfiles:
             dst = self.getPath('gms',gmsf)
             src = '{1}\\dat\\{0}'.format(gmsf,appCon.mbundle_dir)
