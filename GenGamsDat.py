@@ -52,8 +52,8 @@ def run(xlFile, GamsDatFolder):
     for i in range(2,100):    
         rv = sht.range('A{0}'.format(i)).value
         if rv != None:
-            file_Par_RVAT.write('{0} {1:.4f} \n'.format(rv, sht.range('O{0}'.format(i)).value) )
-            file_Par_RVLT.write('{0} {1:.4f} \n'.format(rv, sht.range('P{0}'.format(i)).value) )
+            file_Par_RVAT.write('{0} {1:.4f} \n'.format(rv, sht.range().value) )
+            file_Par_RVLT.write('{0} {1:.4f} \n'.format(rv, sht.range().value) )
         else:
             break
     file_Par_RVAT.close()
