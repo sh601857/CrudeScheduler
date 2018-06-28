@@ -28,7 +28,7 @@ class ScheduleCanvas(FigureCanvas):
                                    QSizePolicy.Expanding,
                                    QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)  
-        self.axes = self.fig.add_axes([0.05, 0.05, 0.9, 0.9], axis_bgcolor=(.94,.94,.94))
+        self.axes = self.fig.add_axes([0.05, 0.05, 0.9, 0.9], facecolor=(.94,.94,.94))
         self.compute_initial_figure()
 
         # contextMenu
@@ -154,7 +154,7 @@ class TankInvCanvas(FigureCanvas):
         self.axes.append( self.fig.add_axes([0.36, 0.05, 0.28, 0.4]) )
         self.axes.append( self.fig.add_axes([0.67, 0.05, 0.28, 0.4]) )
         for ax in self.axes:
-            ax.set_axis_bgcolor((.94,.94,.94))
+            ax.set_facecolor((.94,.94,.94))
 
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)    
@@ -241,8 +241,8 @@ class CDUCKCanvas(FigureCanvas):
         
         self.axes.append( self.fig.add_axes([0.15, 0.55, 0.83, 0.4] ) )
         self.axes.append( self.fig.add_axes([0.15, 0.05, 0.83, 0.4] ,sharex=self.axes[0]) )
-        self.axes[0].set_axis_bgcolor((.94,.94,.94))
-        self.axes[1].set_axis_bgcolor((.94,.94,.94))
+        self.axes[0].set_facecolor((.94,.94,.94))
+        self.axes[1].set_facecolor((.94,.94,.94))
 
 
         FigureCanvas.__init__(self, self.fig)

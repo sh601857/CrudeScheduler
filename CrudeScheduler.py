@@ -6,10 +6,10 @@ import os
 from pathlib import Path
 from PySide import QtCore
 from PySide import QtGui
-import xlwings as xw
-
-import AppProject
 import PlotWidget
+import xlwings as xw
+import AppProject
+
 import LogWidget
 import RunOptWidget
 
